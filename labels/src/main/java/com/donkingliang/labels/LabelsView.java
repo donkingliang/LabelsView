@@ -11,11 +11,6 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
-/**
- * Depiction:
- * Author: teach
- * Date: 2017/3/2 15:10
- */
 public class LabelsView extends ViewGroup {
 
     private Context mContext;
