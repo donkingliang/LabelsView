@@ -1,7 +1,7 @@
 LabelsView
 ======
 标签列表控件的使用介绍。
-##引入
+### 引入
 ```Groovy
 allprojects {
 		repositories {
@@ -14,8 +14,8 @@ dependencies {
 	    compile 'com.github.donkingliang:LabelsView:1.0.0'
 	}
 ```
-##使用
-###编写布局：
+## 使用
+### 编写布局：
 ```xml
 <com.donkingliang.labels.LabelsView
         xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -33,7 +33,7 @@ dependencies {
         app:wordMargin="10dp" />  //标签与标签的距离
 ```
 
-###设置标签：
+### 设置标签：
 ```java
     ArrayList<String> list = new ArrayList<>();
         list.add("Android");
@@ -49,7 +49,7 @@ dependencies {
     labelsView.setLabels(list);
 ```
 
-###设置点击监听：(如果需要的话)
+### 设置点击监听：(如果需要的话)
 ```java
     labels.setOnLabelClickListener(new LabelsView.OnLabelClickListener() {
             @Override
@@ -59,6 +59,6 @@ dependencies {
         });
 ```
 
-###效果图：
+### 效果图：
 ![](https://github.com/donkingliang/LabelsView/blob/master/%E6%95%88%E6%9E%9C%E5%9B%BE.png)  
 想要了解该控件的具体实现的同学，欢迎访问[我的博客](http://blog.csdn.net/u010177022/article/details/60324117)  
