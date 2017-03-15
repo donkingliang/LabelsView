@@ -61,4 +61,5 @@ dependencies {
 
 ### 效果图：
 ![](https://github.com/donkingliang/LabelsView/blob/master/%E6%95%88%E6%9E%9C%E5%9B%BE.png)  
-想要了解该控件的具体实现的同学，欢迎访问[我的博客](http://blog.csdn.net/u010177022/article/details/60324117)  
+想要了解该控件的具体实现的同学，欢迎访问[我的博客](http://blog.csdn.net/u010177022)  
+[Android自定义标签列表控件LabelsView解析](http://blog.csdn.net/u010177022/article/details/60324117)
