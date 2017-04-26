@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="labels_view">
-        <attr name="labelTextColor" format="color" />
+        <attr name="selectType" format="enum">
+            <enum name="NONE" value="1" />
+            <enum name="SINGLE" value="2" />
+            <enum name="MULTI" value="3" />
+        </attr>
+        <attr name="maxSelect" format="integer"/>
+        <attr name="labelTextColor" format="reference" />
         <attr name="labelTextSize" format="dimension" />
         <attr name="labelTextPaddingLeft" format="dimension" />
         <attr name="labelTextPaddingTop" format="dimension" />
@@ -10,6 +16,5 @@
         <attr name="lineMargin" format="dimension" />
         <attr name="wordMargin" format="dimension" />
         <attr name="labelBackground" format="reference" />
-
     </declare-styleable>
 </resources>
