@@ -1,65 +1,161 @@
 LabelsView
 ======
 标签列表控件的使用介绍。
-### 引入
-```Groovy
+
+**1、引入依赖**
+在Project的build.gradle在添加以下代码
+```
 allprojects {
-		repositories {
-			...
-			maven { url 'https://jitpack.io' }
-		}
+	repositories {
+		...
+		maven { url 'https://jitpack.io' }
 	}
-  
+}
+```
+在Module的build.gradle在添加以下代码
+```
 dependencies {
-	    compile 'com.github.donkingliang:LabelsView:1.0.0'
-	}
-```
-## 使用
-### 编写布局：
-```xml
-<com.donkingliang.labels.LabelsView
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/labels"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:labelBackground="@drawable/pink_frame_bg"  //标签的背景
-        app:labelTextColor="#fb435b"  //标签的字体颜色
-        app:labelTextSize="14sp"  //标签的字体大小
-        app:labelTextPaddingBottom="5dp"  //标签的上下左右边距
-        app:labelTextPaddingLeft="10dp"
-        app:labelTextPaddingRight="10dp"
-        app:labelTextPaddingTop="5dp"
-        app:lineMargin="10dp"  //行与行的距离
-        app:wordMargin="10dp" />  //标签与标签的距离
+    compile 'com.github.donkingliang:LabelsView:1.2.0'
+}
 ```
 
-### 设置标签：
-```java
-    ArrayList<String> list = new ArrayList<>();
-        list.add("Android");
-        list.add("IOS");
-        list.add("前端");
-        list.add("后台");
-        list.add("微信开发");
-        list.add("Java");
-        list.add("JavaScript");
-        list.add("C++");
-        list.add("PHP");
-        list.add("Python");
-    labelsView.setLabels(list);
-```
+**2、编写布局：**
 
-### 设置点击监听：(如果需要的话)
-```java
-    labels.setOnLabelClickListener(new LabelsView.OnLabelClickListener() {
-            @Override
-            public void onLabelClick(TextView label, int position) {
-                //label就是被点击的标签，position就是标签的位置。
-            }
-        });
 ```
+   <com.donkingliang.labels.LabelsView 
+       xmlns:app="http://schemas.android.com/apk/res-auto"
+       android:id="@+id/labels"
+       android:layout_width="match_parent"
+       android:layout_height="wrap_content"
+       app:labelBackground="@drawable/label_bg"     //标签的背景
+       app:labelTextColor="@drawable/label_text_color" //标签的字体颜色 可以是一个颜色值
+       app:labelTextSize="14sp"      //标签的字体大小
+       app:labelTextPaddingBottom="5dp"   //标签的上下左右边距
+       app:labelTextPaddingLeft="10dp"
+       app:labelTextPaddingRight="10dp"
+       app:labelTextPaddingTop="5dp"
+       app:lineMargin="10dp"   //行与行的距离
+       app:wordMargin="10dp"   //标签与标签的距离
+       app:selectType="SINGLE"   //标签的选择类型 有单选、多选、不可选三种类型
+       app:maxSelect="5" />  //标签的最大选择数量，只有多选的时候才有用，0为不限数量
+```
+这里有两个地方需要说明一下：
+1）标签的正常样式和选中样式是通过drawable来实现的。比如下面两个drawable。
+```
+<!-- 标签的背景 label_bg -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 标签选中时的背景 -->
+    <item android:state_selected="true">
+        <shape>
+            <stroke android:width="2dp" android:color="#fb435b" />
+            <corners android:radius="8dp" />
+            <solid android:color="@android:color/white" />
+        </shape>
+    </item>
+    <!-- 标签的正常背景 -->
+    <item>
+        <shape>
+            <stroke android:width="2dp" android:color="#656565" />
+            <corners android:radius="8dp" />
+            <solid android:color="@android:color/white" />
+        </shape>
+    </item>
+</selector>
+```
+```
+<!-- 标签的文字颜色 label_text_color -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 标签选中时的文字颜色 -->
+    <item android:color="#fb435b" android:state_selected="true" />
+    <!-- 标签的正常文字颜色 -->
+    <item android:color="#2d2b2b" />
+</selector>
+```
+TextView的textColor属性除了可以设置一个颜色值以外，也可以通过资源来设置的，这一点很多同学都不知道。
+2）标签的选择类型有三种：
+**NONE** ：标签不可选中，也不响应选中事件监听，这是默认值。
+**SINGLE**：单选。
+**MULTI**：多选，可以通过设置maxSelect限定选择的最大数量，0为不限数量。maxSelect只有在多选的时候才有效。
+
+**3、设置标签：**
+
+```
+labelsView = (LabelsView) findViewById(labels);
+ArrayList<String> label = new ArrayList<>();
+label.add("Android");
+label.add("IOS");
+label.add("前端");
+label.add("后台");
+label.add("微信开发");
+label.add("游戏开发");
+label.add("Java");
+label.add("JavaScript");
+label.add("C++");
+label.add("PHP");
+label.add("Python");
+label.add("Swift");
+labelsView.setLabels(label); //直接设置一个字符串数组就可以了。
+```
+**4、设置事件监听：**(如果需要的话)
+
+```
+//标签的点击监听
+labelsView.setOnLabelClickListener(new LabelsView.OnLabelClickListener() {
+    @Override
+    public void onLabelClick(View label, String labelText, int position) {
+         //label是被点击的标签，labelText是标签的文字，position是标签的位置。
+    }
+});
+//标签的选中监听
+labelsView.setOnLabelSelectChangeListener(new LabelsView.OnLabelSelectChangeListener() {
+    @Override
+    public void onLabelSelectChange(View label, String labelText, boolean isSelect, int position) {
+        //label是被点击的标签，labelText是标签的文字，isSelect是是否选中，position是标签的位置。
+    }
+});
+```
+**5、常用方法**
+
+```
+//设置选中标签。
+//positions是个可变类型，表示被选中的标签的位置。
+//比喻labelsView.setSelects(1,2,5);选中第1,3,5个标签。如果是单选的话，只有第一个参数有效。
+public void setSelects(int... positions);
+
+//获取选中的标签。返回的是一个Integer的数组，表示被选中的标签的下标。如果没有选中，数组的size等于0。
+public ArrayList<Integer> getSelectLabels();
+
+//取消所有选中的标签。
+public void clearAllSelect();
+
+//设置标签的选择类型，有NONE、SINGLE和MULTI三种类型。
+public void setSelectType(SelectType selectType);
+
+//设置最大的选择数量，只有selectType等于MULTI是有效。
+public void setMaxSelect(int maxSelect);
+
+//设置标签背景
+public void setLabelBackgroundResource(int resId);
+
+//设置标签的文字颜色
+public void setLabelTextColor(int color);
+public void setLabelTextColor(ColorStateList color);
+
+//设置标签的文字大小（单位是px）
+public void setLabelTextSize(float size);
+
+//设置标签内边距
+public void setLabelTextPadding(int left, int top, int right, int bottom);
+
+//设置行间隔
+public void setLineMargin(int margin);
+
+//设置标签的间隔
+public void setWordMargin(int margin);
+```
+所以的set方法都有对应的get方法，这里就不说了。
 
 ### 效果图：
-![](https://github.com/donkingliang/LabelsView/blob/master/%E6%95%88%E6%9E%9C%E5%9B%BE.png)  
+![效果图](https://github.com/donkingliang/LabelsView/blob/master/%E6%95%88%E6%9E%9C%E5%9B%BE.gif)  
 想要了解该控件的具体实现的同学，欢迎访问[我的博客](http://blog.csdn.net/u010177022)  
 [Android自定义标签列表控件LabelsView解析](http://blog.csdn.net/u010177022/article/details/60324117)
