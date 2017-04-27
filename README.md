@@ -21,7 +21,7 @@ dependencies {
 
 **2、编写布局：**
 
-```
+```xml
    <com.donkingliang.labels.LabelsView 
        xmlns:app="http://schemas.android.com/apk/res-auto"
        android:id="@+id/labels"
@@ -41,7 +41,7 @@ dependencies {
 ```
 这里有两个地方需要说明一下：
 1）标签的正常样式和选中样式是通过drawable来实现的。比如下面两个drawable。
-```
+```xml
 <!-- 标签的背景 label_bg -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- 标签选中时的背景 -->
@@ -62,7 +62,7 @@ dependencies {
     </item>
 </selector>
 ```
-```
+```xml
 <!-- 标签的文字颜色 label_text_color -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- 标签选中时的文字颜色 -->
@@ -82,7 +82,7 @@ TextView的textColor属性除了可以设置一个颜色值以外，也可以通
 
 **3、设置标签：**
 
-```
+```java
 labelsView = (LabelsView) findViewById(labels);
 ArrayList<String> label = new ArrayList<>();
 label.add("Android");
@@ -101,7 +101,7 @@ labelsView.setLabels(label); //直接设置一个字符串数组就可以了。
 ```
 **4、设置事件监听：**(如果需要的话)
 
-```
+```java
 //标签的点击监听
 labelsView.setOnLabelClickListener(new LabelsView.OnLabelClickListener() {
     @Override
@@ -119,7 +119,7 @@ labelsView.setOnLabelSelectChangeListener(new LabelsView.OnLabelSelectChangeList
 ```
 **5、常用方法**
 
-```
+```java
 //设置选中标签。
 //positions是个可变类型，表示被选中的标签的位置。
 //比喻labelsView.setSelects(1,2,5);选中第1,3,5个标签。如果是单选的话，只有第一个参数有效。
