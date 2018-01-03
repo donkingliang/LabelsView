@@ -44,6 +44,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.btn_multi_5).setOnClickListener(this);
         findViewById(R.id.btn_un_select).setOnClickListener(this);
         findViewById(R.id.btn_click).setOnClickListener(this);
+        findViewById(R.id.btn_single_irrevocably).setOnClickListener(this);
+        findViewById(R.id.btn_multi_compulsory).setOnClickListener(this);
     }
 
     @Override
@@ -58,17 +60,30 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 labelsView.setSelectType(LabelsView.SelectType.SINGLE);
                 break;
 
+            case R.id.btn_single_irrevocably:
+                labelsView.setSelectType(LabelsView.SelectType.SINGLE_IRREVOCABLY);
+                break;
+
             case R.id.btn_multi:
                 labelsView.setSelectType(LabelsView.SelectType.MULTI);
                 labelsView.setMaxSelect(0);
                 break;
+
             case R.id.btn_multi_5:
                 labelsView.setSelectType(LabelsView.SelectType.MULTI);
                 labelsView.setMaxSelect(5);
                 break;
+
+            case R.id.btn_multi_compulsory:
+                labelsView.setSelectType(LabelsView.SelectType.MULTI);
+                labelsView.setMaxSelect(0);
+                labelsView.setCompulsorys(0,1);
+                break;
+
             case R.id.btn_un_select:
                 labelsView.clearAllSelect();
                 break;
+
             case R.id.btn_click:
                 labelsView.setSelectType(LabelsView.SelectType.NONE);
                 labelsView.setOnLabelClickListener(new LabelsView.OnLabelClickListener() {

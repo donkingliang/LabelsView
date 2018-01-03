@@ -22,14 +22,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="5dp"
-            android:text="单选" />
+            android:text="单选(可反选)" />
 
         <Button
-            android:id="@+id/btn_multi"
+            android:id="@+id/btn_single_irrevocably"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="5dp"
-            android:text="多选" />
+            android:text="单选(不可反选)" />
 
     </LinearLayout>
 
@@ -38,11 +38,31 @@
         android:layout_height="wrap_content">
 
         <Button
+            android:id="@+id/btn_multi"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:text="多选" />
+
+        <Button
             android:id="@+id/btn_multi_5"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="5dp"
             android:text="多选(最多5个)" />
+
+        <Button
+            android:id="@+id/btn_multi_compulsory"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:text="多选(1,2必选)" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
         <Button
             android:id="@+id/btn_un_select"
@@ -58,6 +78,7 @@
             android:layout_margin="5dp"
             android:text="点击" />
     </LinearLayout>
+
 
     <com.donkingliang.labels.LabelsView xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/labels"

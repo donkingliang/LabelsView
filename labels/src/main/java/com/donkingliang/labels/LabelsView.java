@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class LabelsView extends ViewGroup implements View.OnClickListener {
 
@@ -33,6 +34,9 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
     //保存选中的label的位置
     private ArrayList<Integer> mSelectLabels = new ArrayList<>();
 
+    //保存必选项。在多选模式下，可以设置必选项，必选项默认选中，不能反选
+    private ArrayList<Integer> mCompulsorys = new ArrayList<>();
+
     private OnLabelClickListener mLabelClickListener;
     private OnLabelSelectChangeListener mLabelSelectChangeListener;
 
@@ -42,10 +46,12 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
     public enum SelectType {
         //不可选中，也不响应选中事件回调。（默认）
         NONE(1),
-        //单选
+        //单选,可以反选。
         SINGLE(2),
+        //单选,不可以反选。这种模式下，至少有一个是选中的，默认是第一个
+        SINGLE_IRREVOCABLY(3),
         //多选
-        MULTI(3);
+        MULTI(4);
 
         int value;
 
@@ -60,6 +66,8 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
                 case 2:
                     return SINGLE;
                 case 3:
+                    return SINGLE_IRREVOCABLY;
+                case 4:
                     return MULTI;
             }
             return NONE;
@@ -220,6 +228,7 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
     private static final String KEY_MAX_SELECT_STATE = "key_max_select_state";
     private static final String KEY_LABELS_STATE = "key_labels_state";
     private static final String KEY_SELECT_LABELS_STATE = "key_select_labels_state";
+    private static final String KEY_COMPULSORY_LABELS_STATE = "key_select_compulsory_state";
 
     @Override
     protected Parcelable onSaveInstanceState() {
@@ -253,6 +262,11 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
         //保存已选择的标签列表
         if (!mSelectLabels.isEmpty()) {
             bundle.putIntegerArrayList(KEY_SELECT_LABELS_STATE, mSelectLabels);
+        }
+
+        //保存必选项列表
+        if (!mCompulsorys.isEmpty()) {
+            bundle.putIntegerArrayList(KEY_COMPULSORY_LABELS_STATE, mCompulsorys);
         }
 
         return bundle;
@@ -295,6 +309,11 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
             if (labels != null && !labels.isEmpty()) {
                 setLabels(labels);
             }
+            //恢复必选项列表
+            ArrayList<Integer> compulsory = bundle.getIntegerArrayList(KEY_COMPULSORY_LABELS_STATE);
+            if (compulsory != null && !compulsory.isEmpty()) {
+                setCompulsorys(compulsory);
+            }
             //恢复已选择的标签列表
             ArrayList<Integer> selectLabel = bundle.getIntegerArrayList(KEY_SELECT_LABELS_STATE);
             if (selectLabel != null && !selectLabel.isEmpty()) {
@@ -315,9 +334,9 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
      *
      * @param labels
      */
-    public void setLabels(ArrayList<String> labels) {
+    public void setLabels(List<String> labels) {
         //清空原有的标签
-        clearAllSelect();
+        innerClearAllSelect();
         removeAllViews();
         mLabels.clear();
 
@@ -328,6 +347,10 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
                 addLabel(labels.get(i), i);
             }
         }
+
+        if (mSelectType == SelectType.SINGLE_IRREVOCABLY) {
+            setSelects(0);
+        }
     }
 
     /**
@@ -335,7 +358,7 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
      *
      * @return
      */
-    public ArrayList<String> getLabels() {
+    public List<String> getLabels() {
         return mLabels;
     }
 
@@ -344,7 +367,7 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
         label.setPadding(mTextPaddingLeft, mTextPaddingTop, mTextPaddingRight, mTextPaddingBottom);
         label.setTextSize(TypedValue.COMPLEX_UNIT_PX, mTextSize);
         label.setTextColor(mTextColor != null ? mTextColor : ColorStateList.valueOf(0xFF000000));
-        label.setText(text);
+        label.setText(text.trim());
         if (mLabelBgResId != 0) {
             label.setBackgroundResource(mLabelBgResId);
         }
@@ -360,9 +383,12 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
             TextView label = (TextView) v;
             if (mSelectType != SelectType.NONE) {
                 if (label.isSelected()) {
-                    setLabelSelect(label, false);
-                } else if (mSelectType == SelectType.SINGLE) {
-                    clearAllSelect();
+                    if (mSelectType != SelectType.SINGLE_IRREVOCABLY
+                            && !mCompulsorys.contains((Integer) label.getTag())) {
+                        setLabelSelect(label, false);
+                    }
+                } else if (mSelectType == SelectType.SINGLE || mSelectType == SelectType.SINGLE_IRREVOCABLY) {
+                    innerClearAllSelect();
                     setLabelSelect(label, true);
                 } else if (mSelectType == SelectType.MULTI
                         && (mMaxSelect <= 0 || mMaxSelect > mSelectLabels.size())) {
@@ -395,11 +421,50 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
      * 取消所有选中的label
      */
     public void clearAllSelect() {
+        if (mSelectType != SelectType.SINGLE_IRREVOCABLY) {
+            if (mSelectType == SelectType.MULTI && !mCompulsorys.isEmpty()) {
+                clearNotCompulsorySelect();
+            } else {
+                innerClearAllSelect();
+            }
+        }
+    }
+
+    private void innerClearAllSelect() {
         int count = getChildCount();
         for (int i = 0; i < count; i++) {
             setLabelSelect((TextView) getChildAt(i), false);
         }
         mSelectLabels.clear();
+    }
+
+    private void clearNotCompulsorySelect() {
+        int count = getChildCount();
+        List<Integer> temps = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            if (!mCompulsorys.contains(i)) {
+                setLabelSelect((TextView) getChildAt(i), false);
+                temps.add(i);
+            }
+
+        }
+        mSelectLabels.removeAll(temps);
+    }
+
+    /**
+     * 设置选中label
+     *
+     * @param positions
+     */
+    public void setSelects(List<Integer> positions) {
+        if (positions != null) {
+            int size = positions.size();
+            int[] ps = new int[size];
+            for (int i = 0; i < size; i++) {
+                ps[i] = positions.get(i);
+            }
+            setSelects(ps);
+        }
     }
 
     /**
@@ -411,7 +476,8 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
         if (mSelectType != SelectType.NONE) {
             ArrayList<TextView> selectLabels = new ArrayList<>();
             int count = getChildCount();
-            int size = mSelectType == SelectType.SINGLE ? 1 : mMaxSelect;
+            int size = mSelectType == SelectType.SINGLE || mSelectType == SelectType.SINGLE_IRREVOCABLY
+                    ? 1 : mMaxSelect;
             for (int p : positions) {
                 if (p < count) {
                     TextView label = (TextView) getChildAt(p);
@@ -435,11 +501,61 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
     }
 
     /**
+     * 设置必选项，只有在多项模式下，这个方法才有效
+     *
+     * @param positions
+     */
+    public void setCompulsorys(List<Integer> positions) {
+        if (mSelectType == SelectType.MULTI && positions != null) {
+            mCompulsorys.clear();
+            mCompulsorys.addAll(positions);
+            //必选项发生改变，就要恢复到初始状态。
+            innerClearAllSelect();
+            setSelects(positions);
+        }
+    }
+
+    /**
+     * 设置必选项，只有在多项模式下，这个方法才有效
+     *
+     * @param positions
+     */
+    public void setCompulsorys(int... positions) {
+        if (mSelectType == SelectType.MULTI && positions != null) {
+            List<Integer> ps = new ArrayList<>(positions.length);
+            for (int i : positions) {
+                ps.add(i);
+            }
+            setCompulsorys(ps);
+        }
+    }
+
+    /**
+     * 获取必选项，
+     *
+     * @return
+     */
+    public List<Integer> getCompulsorys() {
+        return mCompulsorys;
+    }
+
+    /**
+     * 清空必选项，只有在多项模式下，这个方法才有效
+     */
+    public void clearCompulsorys() {
+        if (mSelectType == SelectType.MULTI && !mCompulsorys.isEmpty()) {
+            mCompulsorys.clear();
+            //必选项发生改变，就要恢复到初始状态。
+            innerClearAllSelect();
+        }
+    }
+
+    /**
      * 获取选中的label
      *
      * @return
      */
-    public ArrayList<Integer> getSelectLabels() {
+    public List<Integer> getSelectLabels() {
         return mSelectLabels;
     }
 
@@ -582,7 +698,15 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
         if (mSelectType != selectType) {
             mSelectType = selectType;
             //选择类型发生改变，就要恢复到初始状态。
-            clearAllSelect();
+            innerClearAllSelect();
+
+            if (mSelectType == SelectType.SINGLE_IRREVOCABLY) {
+                setSelects(0);
+            }
+
+            if (mSelectType != SelectType.MULTI) {
+                mCompulsorys.clear();
+            }
         }
     }
 
@@ -600,7 +724,7 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
             mMaxSelect = maxSelect;
             if (mSelectType == SelectType.MULTI) {
                 //最大选择数量发生改变，就要恢复到初始状态。
-                clearAllSelect();
+                innerClearAllSelect();
             }
         }
     }
