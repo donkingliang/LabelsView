@@ -15,7 +15,7 @@ allprojects {
 在Module的build.gradle在添加以下代码
 ```
 dependencies {
-    compile 'com.github.donkingliang:LabelsView:1.2.0'
+    compile 'com.github.donkingliang:LabelsView:1.3.0'
 }
 ```
 
@@ -36,7 +36,7 @@ dependencies {
        app:labelTextPaddingTop="5dp"
        app:lineMargin="10dp"   //行与行的距离
        app:wordMargin="10dp"   //标签与标签的距离
-       app:selectType="SINGLE"   //标签的选择类型 有单选、多选、不可选三种类型
+       app:selectType="SINGLE"   //标签的选择类型 有单选(可反选)、单选(不可反选)、多选、不可选四种类型
        app:maxSelect="5" />  //标签的最大选择数量，只有多选的时候才有用，0为不限数量
 ```
 这里有两个地方需要说明一下：
@@ -72,13 +72,16 @@ dependencies {
 </selector>
 ```
 TextView的textColor属性除了可以设置一个颜色值以外，也可以通过资源来设置的，这一点很多同学都不知道。
-2）标签的选择类型有三种：
+
+2）标签的选择类型有四种：
 
 **NONE** ：标签不可选中，也不响应选中事件监听，这是默认值。
 
-**SINGLE**：单选。
+**SINGLE**：单选(可反选)。这种模式下，可以一个也不选。
 
-**MULTI**：多选，可以通过设置maxSelect限定选择的最大数量，0为不限数量。maxSelect只有在多选的时候才有效。
+**SINGLE_IRREVOCABLY**：单选(不可反选)。这种模式下，有且只有一个是选中的。默认是第一个
+
+**MULTI**：多选，可以通过设置maxSelect限定选择的最大数量，0为不限数量。maxSelect只有在多选的时候才有效。多选模式下可以设置一些标签为必选项。必选项的标签默认选中，而不能取消。
 
 **3、设置标签：**
 
@@ -124,6 +127,7 @@ labelsView.setOnLabelSelectChangeListener(new LabelsView.OnLabelSelectChangeList
 //positions是个可变类型，表示被选中的标签的位置。
 //比喻labelsView.setSelects(1,2,5);选中第1,3,5个标签。如果是单选的话，只有第一个参数有效。
 public void setSelects(int... positions);
+public void setSelects(List<Integer> positions)；
 
 //获取选中的标签。返回的是一个Integer的数组，表示被选中的标签的下标。如果没有选中，数组的size等于0。
 public ArrayList<Integer> getSelectLabels();
@@ -131,11 +135,18 @@ public ArrayList<Integer> getSelectLabels();
 //取消所有选中的标签。
 public void clearAllSelect();
 
-//设置标签的选择类型，有NONE、SINGLE和MULTI三种类型。
+//设置标签的选择类型，有NONE、SINGLE、SINGLE_IRREVOCABLY和MULTI四种类型。
 public void setSelectType(SelectType selectType);
 
 //设置最大的选择数量，只有selectType等于MULTI是有效。
 public void setMaxSelect(int maxSelect);
+
+//设置必选项，只有在多项模式下，这个方法才有效
+public void setCompulsorys(int... positions)
+public void setCompulsorys(List<Integer> positions)
+
+//清空必选项，只有在多项模式下，这个方法才有效
+public void clearCompulsorys()
 
 //设置标签背景
 public void setLabelBackgroundResource(int resId);
