@@ -30,7 +30,12 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
     private SelectType mSelectType;
     private int mMaxSelect;
 
-    private ArrayList<String> mLabels = new ArrayList<>();
+    //用于保存label数据的key
+    private static final int KEY_DATA = R.id.tag_key_data;
+    //用于保存label位置的key
+    private static final int KEY_POSITION = R.id.tag_key_position;
+
+    private ArrayList<Object> mLabels = new ArrayList<>();
     //保存选中的label的位置
     private ArrayList<Integer> mSelectLabels = new ArrayList<>();
 
@@ -226,6 +231,9 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
     private static final String KEY_LINE_MARGIN_STATE = "key_line_margin_state";
     private static final String KEY_SELECT_TYPE_STATE = "key_select_type_state";
     private static final String KEY_MAX_SELECT_STATE = "key_max_select_state";
+    // 由于新版(1.4.0)的标签列表允许设置任何类型的数据，而不仅仅是String。并且标签显示的内容
+    // 最终由LabelTextProvider提供，所以LabelsView不再在onSaveInstanceState()和onRestoreInstanceState()
+    // 中保存和恢复标签列表的数据。
     private static final String KEY_LABELS_STATE = "key_labels_state";
     private static final String KEY_SELECT_LABELS_STATE = "key_select_labels_state";
     private static final String KEY_COMPULSORY_LABELS_STATE = "key_select_compulsory_state";
@@ -256,9 +264,9 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
         //保存标签的最大选择数量
         bundle.putInt(KEY_MAX_SELECT_STATE, mMaxSelect);
         //保存标签列表
-        if (!mLabels.isEmpty()) {
-            bundle.putStringArrayList(KEY_LABELS_STATE, mLabels);
-        }
+//        if (!mLabels.isEmpty()) {
+//            bundle.putStringArrayList(KEY_LABELS_STATE, mLabels);
+//        }
         //保存已选择的标签列表
         if (!mSelectLabels.isEmpty()) {
             bundle.putIntegerArrayList(KEY_SELECT_LABELS_STATE, mSelectLabels);
@@ -304,11 +312,11 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
             setSelectType(SelectType.get(bundle.getInt(KEY_SELECT_TYPE_STATE, mSelectType.value)));
             //恢复标签的最大选择数量
             setMaxSelect(bundle.getInt(KEY_MAX_SELECT_STATE, mMaxSelect));
-            //恢复标签列表
-            ArrayList<String> labels = bundle.getStringArrayList(KEY_LABELS_STATE);
-            if (labels != null && !labels.isEmpty()) {
-                setLabels(labels);
-            }
+//            //恢复标签列表
+//            ArrayList<String> labels = bundle.getStringArrayList(KEY_LABELS_STATE);
+//            if (labels != null && !labels.isEmpty()) {
+//                setLabels(labels);
+//            }
             //恢复必选项列表
             ArrayList<Integer> compulsory = bundle.getIntegerArrayList(KEY_COMPULSORY_LABELS_STATE);
             if (compulsory != null && !compulsory.isEmpty()) {
@@ -335,6 +343,21 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
      * @param labels
      */
     public void setLabels(List<String> labels) {
+        setLabels(labels, new LabelTextProvider<String>() {
+            @Override
+            public CharSequence getLabelText(TextView label, int position, String data) {
+                return data.trim();
+            }
+        });
+    }
+
+    /**
+     * 设置标签列表，标签列表的数据可以是任何类型的数据，它最终显示的内容由LabelTextProvider根据标签的数据提供。
+     * @param labels
+     * @param provider
+     * @param <T>
+     */
+    public <T> void setLabels(List<T> labels,LabelTextProvider<T> provider){
         //清空原有的标签
         innerClearAllSelect();
         removeAllViews();
@@ -344,7 +367,7 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
             mLabels.addAll(labels);
             int size = labels.size();
             for (int i = 0; i < size; i++) {
-                addLabel(labels.get(i), i);
+                addLabel(labels.get(i), i,provider);
             }
         }
 
@@ -358,23 +381,24 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
      *
      * @return
      */
-    public List<String> getLabels() {
-        return mLabels;
+    public <T> List<T> getLabels() {
+        return (List<T>) mLabels;
     }
 
-    private void addLabel(String text, int position) {
+    private <T> void addLabel(T data, int position,LabelTextProvider<T> provider) {
         final TextView label = new TextView(mContext);
         label.setPadding(mTextPaddingLeft, mTextPaddingTop, mTextPaddingRight, mTextPaddingBottom);
         label.setTextSize(TypedValue.COMPLEX_UNIT_PX, mTextSize);
         label.setTextColor(mTextColor != null ? mTextColor : ColorStateList.valueOf(0xFF000000));
-        label.setText(text.trim());
         if (mLabelBgResId != 0) {
             label.setBackgroundResource(mLabelBgResId);
         }
-        //label通过tag保存自己的位置(position)
-        label.setTag(position);
+        //label通过tag保存自己的数据(data)和位置(position)
+        label.setTag(KEY_DATA,data);
+        label.setTag(KEY_POSITION,position);
         label.setOnClickListener(this);
         addView(label);
+        label.setText(provider.getLabelText(label,position,data));
     }
 
     @Override
@@ -384,7 +408,7 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
             if (mSelectType != SelectType.NONE) {
                 if (label.isSelected()) {
                     if (mSelectType != SelectType.SINGLE_IRREVOCABLY
-                            && !mCompulsorys.contains((Integer) label.getTag())) {
+                            && !mCompulsorys.contains((Integer) label.getTag(KEY_POSITION))) {
                         setLabelSelect(label, false);
                     }
                 } else if (mSelectType == SelectType.SINGLE || mSelectType == SelectType.SINGLE_IRREVOCABLY) {
@@ -397,7 +421,7 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
             }
 
             if (mLabelClickListener != null) {
-                mLabelClickListener.onLabelClick(label, label.getText().toString(), (int) v.getTag());
+                mLabelClickListener.onLabelClick(label, label.getTag(KEY_DATA), (int) label.getTag(KEY_POSITION));
             }
         }
     }
@@ -406,13 +430,13 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
         if (label.isSelected() != isSelect) {
             label.setSelected(isSelect);
             if (isSelect) {
-                mSelectLabels.add((Integer) label.getTag());
+                mSelectLabels.add((Integer) label.getTag(KEY_POSITION));
             } else {
-                mSelectLabels.remove((Integer) label.getTag());
+                mSelectLabels.remove((Integer) label.getTag(KEY_POSITION));
             }
             if (mLabelSelectChangeListener != null) {
-                mLabelSelectChangeListener.onLabelSelectChange(label, label.getText().toString(),
-                        isSelect, (int) label.getTag());
+                mLabelSelectChangeListener.onLabelSelectChange(label, label.getTag(KEY_DATA),
+                        isSelect, (int) label.getTag(KEY_POSITION));
             }
         }
     }
@@ -551,12 +575,30 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
     }
 
     /**
-     * 获取选中的label
+     * 获取选中的label(返回的是所有选中的标签的位置)
      *
      * @return
      */
     public List<Integer> getSelectLabels() {
         return mSelectLabels;
+    }
+
+    /**
+     * 获取选中的label(返回的是所头选中的标签的数据)
+     * @param <T>
+     * @return
+     */
+    public <T> List<T> getSelectLabelDatas(){
+        List<T> list = new ArrayList<>();
+        int size = mSelectLabels.size();
+        for (int i = 0;i < size;i++){
+            View label = getChildAt(mSelectLabels.get(i));
+            Object data = label.getTag(KEY_DATA);
+            if (data != null){
+                list.add((T) data);
+            }
+        }
+        return list;
     }
 
     /**
@@ -760,11 +802,45 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
     }
 
     public interface OnLabelClickListener {
-        void onLabelClick(View label, String labelText, int position);
+
+        /**
+         *
+         * @param label 标签
+         * @param data 标签对应的数据
+         * @param position 标签位置
+         */
+        void onLabelClick(TextView label, Object data, int position);
     }
 
     public interface OnLabelSelectChangeListener {
-        void onLabelSelectChange(View label, String labelText, boolean isSelect, int position);
+
+        /**
+         *
+         * @param label 标签
+         * @param data 标签对应的数据
+         * @param isSelect 是否选中
+         * @param position 标签位置
+         */
+        void onLabelSelectChange(TextView label, Object data, boolean isSelect, int position);
+    }
+
+    /**
+     * 给标签提供最终需要显示的数据。因为LabelsView的列表可以设置任何类型的数据，而LabelsView里的每个item的是一
+     * 个TextView，只能显示CharSequence的数据，所以LabelTextProvider需要根据每个item的数据返回item最终要显示
+     * 的CharSequence。
+     *
+     * @param <T>
+     */
+    public interface LabelTextProvider<T>{
+
+        /**
+         * 根据data和position返回label需要需要显示的数据。
+         * @param label
+         * @param position
+         * @param data
+         * @return
+         */
+        CharSequence getLabelText(TextView label,int position,T data);
     }
 
 }
