@@ -127,7 +127,7 @@ labelsView.setOnLabelClickListener(new LabelsView.OnLabelClickListener() {
 labelsView.setOnLabelSelectChangeListener(new LabelsView.OnLabelSelectChangeListener() {
     @Override
     public void onLabelSelectChange(TextView label, Object data, boolean isSelect, int position) {
-        //label是被点击的标签，data是标签所对应的数据，isSelect是是否选中，position是标签的位置。
+        //label是被选中的标签，data是标签所对应的数据，isSelect是是否选中，position是标签的位置。
     }
 });
 ```
