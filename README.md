@@ -15,7 +15,7 @@ allprojects {
 在Module的build.gradle在添加以下代码
 ```
 dependencies {
-    compile 'com.github.donkingliang:LabelsView:1.3.0'
+    compile 'com.github.donkingliang:LabelsView:1.4.0'
 }
 ```
 
@@ -95,13 +95,23 @@ label.add("前端");
 label.add("后台");
 label.add("微信开发");
 label.add("游戏开发");
-label.add("Java");
-label.add("JavaScript");
-label.add("C++");
-label.add("PHP");
-label.add("Python");
-label.add("Swift");
 labelsView.setLabels(label); //直接设置一个字符串数组就可以了。
+
+//LabelsView可以设置任何类型的数据，而不仅仅是String。
+ArrayList<TestBean> testList = new ArrayList<>();
+testList.add(new TestBean("Android",1));
+testList.add(new TestBean("IOS",2));
+testList.add(new TestBean("前端",3));
+testList.add(new TestBean("后台",4));
+testList.add(new TestBean("微信开发",5));
+testList.add(new TestBean("游戏开发",6));
+labelsView.setLabels(testList, new LabelsView.LabelTextProvider<TestBean>() {
+    @Override
+    public CharSequence getLabelText(TextView label, int position, TestBean data) {
+    	//根据data和position返回label需要显示的数据。
+        return data.getName();
+    }
+});
 ```
 **4、设置事件监听：**(如果需要的话)
 
@@ -109,15 +119,15 @@ labelsView.setLabels(label); //直接设置一个字符串数组就可以了。
 //标签的点击监听
 labelsView.setOnLabelClickListener(new LabelsView.OnLabelClickListener() {
     @Override
-    public void onLabelClick(View label, String labelText, int position) {
-         //label是被点击的标签，labelText是标签的文字，position是标签的位置。
+    public void onLabelClick(TextView label, Object data, int position) {
+         //label是被点击的标签，data是标签所对应的数据，position是标签的位置。
     }
 });
 //标签的选中监听
 labelsView.setOnLabelSelectChangeListener(new LabelsView.OnLabelSelectChangeListener() {
     @Override
-    public void onLabelSelectChange(View label, String labelText, boolean isSelect, int position) {
-        //label是被点击的标签，labelText是标签的文字，isSelect是是否选中，position是标签的位置。
+    public void onLabelSelectChange(TextView label, Object data, boolean isSelect, int position) {
+        //label是被点击的标签，data是标签所对应的数据，isSelect是是否选中，position是标签的位置。
     }
 });
 ```
@@ -130,8 +140,10 @@ labelsView.setOnLabelSelectChangeListener(new LabelsView.OnLabelSelectChangeList
 public void setSelects(int... positions);
 public void setSelects(List<Integer> positions)；
 
-//获取选中的标签。返回的是一个Integer的数组，表示被选中的标签的下标。如果没有选中，数组的size等于0。
+//获取选中的标签(返回的是所有选中的标签的位置)。返回的是一个Integer的数组，表示被选中的标签的下标。如果没有选中，数组的size等于0。
 public ArrayList<Integer> getSelectLabels();
+//获取选中的label(返回的是所有选中的标签的数据)。如果没有选中，数组的size等于0。T表示标签的数据类型。
+public <T> List<T> getSelectLabelDatas();
 
 //取消所有选中的标签。
 public void clearAllSelect();
@@ -168,7 +180,7 @@ public void setLineMargin(int margin);
 //设置标签的间隔
 public void setWordMargin(int margin);
 ```
-所以的set方法都有对应的get方法，这里就不说了。
+所有的set方法都有对应的get方法，这里就不说了。
 
 ### 效果图：
 ![效果图](https://github.com/donkingliang/LabelsView/blob/master/%E6%95%88%E6%9E%9C%E5%9B%BE.gif)  
