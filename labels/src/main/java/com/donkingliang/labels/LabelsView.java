@@ -137,7 +137,13 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
             View view = getChildAt(i);
             measureChild(view, widthMeasureSpec, heightMeasureSpec);
 
-            if (maxWidth < lineWidth + view.getMeasuredWidth()) {
+            if (!begin) {
+                lineWidth += mWordMargin;
+            } else {
+                begin = false;
+            }
+
+            if (maxWidth <= lineWidth + view.getMeasuredWidth()) {
                 contentHeight += mLineMargin;
                 contentHeight += maxItemHeight;
                 maxItemHeight = 0;
@@ -146,11 +152,7 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
                 begin = true;
             }
             maxItemHeight = Math.max(maxItemHeight, view.getMeasuredHeight());
-            if (!begin) {
-                lineWidth += mWordMargin;
-            } else {
-                begin = false;
-            }
+
             lineWidth += view.getMeasuredWidth();
         }
 
