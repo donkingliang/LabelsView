@@ -3,6 +3,8 @@ package com.donkingliang.labels;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.AttributeSet;
@@ -20,7 +22,7 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
 
     private ColorStateList mTextColor;
     private float mTextSize;
-    private int mLabelBgResId;
+    private Drawable mLabelBg;
     private int mTextPaddingLeft;
     private int mTextPaddingTop;
     private int mTextPaddingRight;
@@ -116,7 +118,8 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
                     R.styleable.labels_view_labelTextPaddingBottom, 0);
             mLineMargin = mTypedArray.getDimensionPixelOffset(R.styleable.labels_view_lineMargin, 0);
             mWordMargin = mTypedArray.getDimensionPixelOffset(R.styleable.labels_view_wordMargin, 0);
-            mLabelBgResId = mTypedArray.getResourceId(R.styleable.labels_view_labelBackground, 0);
+            int labelBgResId = mTypedArray.getResourceId(R.styleable.labels_view_labelBackground, 0);
+            mLabelBg = getResources().getDrawable(labelBgResId);
             mTypedArray.recycle();
         }
     }
@@ -252,8 +255,8 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
         }
         //保存标签文字大小
         bundle.putFloat(KEY_TEXT_SIZE_STATE, mTextSize);
-        //保存标签背景
-        bundle.putInt(KEY_BG_RES_ID_STATE, mLabelBgResId);
+        //保存标签背景 (由于背景改用Drawable,所以不能自动保存和恢复)
+//        bundle.putInt(KEY_BG_RES_ID_STATE, mLabelBgResId);
         //保存标签内边距
         bundle.putIntArray(KEY_PADDING_STATE, new int[]{mTextPaddingLeft, mTextPaddingTop,
                 mTextPaddingRight, mTextPaddingBottom});
@@ -296,11 +299,11 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
             }
             //恢复标签文字大小
             setLabelTextSize(bundle.getFloat(KEY_TEXT_SIZE_STATE, mTextSize));
-            //恢复标签背景
-            int resId = bundle.getInt(KEY_BG_RES_ID_STATE, mLabelBgResId);
-            if (resId != 0) {
-                setLabelBackgroundResource(resId);
-            }
+//            //恢复标签背景  (由于背景改用Drawable,所以不能自动保存和恢复)
+//            int resId = bundle.getInt(KEY_BG_RES_ID_STATE, mLabelBgResId);
+//            if (resId != 0) {
+//                setLabelBackgroundResource(resId);
+//            }
             //恢复标签内边距
             int[] padding = bundle.getIntArray(KEY_PADDING_STATE);
             if (padding != null && padding.length == 4) {
@@ -355,11 +358,12 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
 
     /**
      * 设置标签列表，标签列表的数据可以是任何类型的数据，它最终显示的内容由LabelTextProvider根据标签的数据提供。
+     *
      * @param labels
      * @param provider
      * @param <T>
      */
-    public <T> void setLabels(List<T> labels,LabelTextProvider<T> provider){
+    public <T> void setLabels(List<T> labels, LabelTextProvider<T> provider) {
         //清空原有的标签
         innerClearAllSelect();
         removeAllViews();
@@ -369,7 +373,7 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
             mLabels.addAll(labels);
             int size = labels.size();
             for (int i = 0; i < size; i++) {
-                addLabel(labels.get(i), i,provider);
+                addLabel(labels.get(i), i, provider);
             }
         }
 
@@ -387,20 +391,20 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
         return (List<T>) mLabels;
     }
 
-    private <T> void addLabel(T data, int position,LabelTextProvider<T> provider) {
+    private <T> void addLabel(T data, int position, LabelTextProvider<T> provider) {
         final TextView label = new TextView(mContext);
         label.setPadding(mTextPaddingLeft, mTextPaddingTop, mTextPaddingRight, mTextPaddingBottom);
         label.setTextSize(TypedValue.COMPLEX_UNIT_PX, mTextSize);
         label.setTextColor(mTextColor != null ? mTextColor : ColorStateList.valueOf(0xFF000000));
-        if (mLabelBgResId != 0) {
-            label.setBackgroundResource(mLabelBgResId);
-        }
+        //设置给label的背景(Drawable)是一个Drawable对象的拷贝，
+        // 因为如果所有的标签都共用一个Drawable对象，会引起背景错乱。
+        label.setBackgroundDrawable(mLabelBg.getConstantState().newDrawable());
         //label通过tag保存自己的数据(data)和位置(position)
-        label.setTag(KEY_DATA,data);
-        label.setTag(KEY_POSITION,position);
+        label.setTag(KEY_DATA, data);
+        label.setTag(KEY_POSITION, position);
         label.setOnClickListener(this);
         addView(label);
-        label.setText(provider.getLabelText(label,position,data));
+        label.setText(provider.getLabelText(label, position, data));
     }
 
     @Override
@@ -587,16 +591,17 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
 
     /**
      * 获取选中的label(返回的是所头选中的标签的数据)
+     *
      * @param <T>
      * @return
      */
-    public <T> List<T> getSelectLabelDatas(){
+    public <T> List<T> getSelectLabelDatas() {
         List<T> list = new ArrayList<>();
         int size = mSelectLabels.size();
-        for (int i = 0;i < size;i++){
+        for (int i = 0; i < size; i++) {
             View label = getChildAt(mSelectLabels.get(i));
             Object data = label.getTag(KEY_DATA);
-            if (data != null){
+            if (data != null) {
                 list.add((T) data);
             }
         }
@@ -609,13 +614,29 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
      * @param resId
      */
     public void setLabelBackgroundResource(int resId) {
-        if (mLabelBgResId != resId) {
-            mLabelBgResId = resId;
-            int count = getChildCount();
-            for (int i = 0; i < count; i++) {
-                TextView label = (TextView) getChildAt(i);
-                label.setBackgroundResource(mLabelBgResId);
-            }
+        setLabelBackgroundDrawable(getResources().getDrawable(resId));
+    }
+
+    /**
+     * 设置标签背景
+     *
+     * @param color
+     */
+    public void setLabelBackgroundColor(int color) {
+        setLabelBackgroundDrawable(new ColorDrawable(color));
+    }
+
+    /**
+     * 设置标签背景
+     *
+     * @param drawable
+     */
+    public void setLabelBackgroundDrawable(Drawable drawable) {
+        mLabelBg = drawable;
+        int count = getChildCount();
+        for (int i = 0; i < count; i++) {
+            TextView label = (TextView) getChildAt(i);
+            label.setBackgroundDrawable(mLabelBg.getConstantState().newDrawable());
         }
     }
 
@@ -806,9 +827,8 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
     public interface OnLabelClickListener {
 
         /**
-         *
-         * @param label 标签
-         * @param data 标签对应的数据
+         * @param label    标签
+         * @param data     标签对应的数据
          * @param position 标签位置
          */
         void onLabelClick(TextView label, Object data, int position);
@@ -817,9 +837,8 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
     public interface OnLabelSelectChangeListener {
 
         /**
-         *
-         * @param label 标签
-         * @param data 标签对应的数据
+         * @param label    标签
+         * @param data     标签对应的数据
          * @param isSelect 是否选中
          * @param position 标签位置
          */
@@ -833,16 +852,17 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
      *
      * @param <T>
      */
-    public interface LabelTextProvider<T>{
+    public interface LabelTextProvider<T> {
 
         /**
          * 根据data和position返回label需要需要显示的数据。
+         *
          * @param label
          * @param position
          * @param data
          * @return
          */
-        CharSequence getLabelText(TextView label,int position,T data);
+        CharSequence getLabelText(TextView label, int position, T data);
     }
 
 }
