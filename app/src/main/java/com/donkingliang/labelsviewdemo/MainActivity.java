@@ -37,7 +37,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         label.add("PHP");
         label.add("Python");
         label.add("Swift");
-        labelsView.setAddLabel(true);
         labelsView.setSelectType(LabelsView.SelectType.NONE);
         labelsView.setAddTextViewListener(new View.OnClickListener() {
             @Override

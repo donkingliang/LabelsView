@@ -130,6 +130,15 @@ labelsView.setOnLabelSelectChangeListener(new LabelsView.OnLabelSelectChangeList
         //label是被选中的标签，data是标签所对应的数据，isSelect是是否选中，position是标签的位置。
     }
 });
+
+//『+添加标签』的点击监听
+ labelsView.setAddTextViewListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                label.add("测试");
+                labelsView.setLabels(label);
+            }
+        });
 ```
 **5、常用方法**
 
@@ -179,7 +188,11 @@ public void setLineMargin(int margin);
 
 //设置标签的间隔
 public void setWordMargin(int margin);
+
+//尾部添加『+添加标签』项
+public void setAddLabel(boolean visible)
 ```
+
 所有的set方法都有对应的get方法，这里就不说了。
 
 ### 效果图：
