@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <declare-styleable name="labels_view">
+    <declare-styleable name="LabelsView">
         <attr name="selectType" format="enum">
             <enum name="NONE" value="1" />
             <enum name="SINGLE" value="2" />
@@ -17,5 +17,6 @@
         <attr name="lineMargin" format="dimension" />
         <attr name="wordMargin" format="dimension" />
         <attr name="labelBackground" format="reference" />
+        <attr name="AddLabelVisible" format="boolean" />
     </declare-styleable>
 </resources>
