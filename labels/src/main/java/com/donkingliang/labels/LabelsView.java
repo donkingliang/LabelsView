@@ -3,6 +3,7 @@ package com.donkingliang.labels;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
+import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -119,7 +120,12 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
             mLineMargin = mTypedArray.getDimensionPixelOffset(R.styleable.labels_view_lineMargin, 0);
             mWordMargin = mTypedArray.getDimensionPixelOffset(R.styleable.labels_view_wordMargin, 0);
             int labelBgResId = mTypedArray.getResourceId(R.styleable.labels_view_labelBackground, 0);
-            mLabelBg = getResources().getDrawable(labelBgResId);
+            if (labelBgResId != 0) {
+                mLabelBg = getResources().getDrawable(labelBgResId);
+            } else {
+                int labelBgColor = mTypedArray.getColor(R.styleable.labels_view_labelBackground, Color.TRANSPARENT);
+                mLabelBg = new ColorDrawable(labelBgColor);
+            }
             mTypedArray.recycle();
         }
     }

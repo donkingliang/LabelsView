@@ -7,8 +7,8 @@
             <enum name="SINGLE_IRREVOCABLY" value="3" />
             <enum name="MULTI" value="4" />
         </attr>
-        <attr name="maxSelect" format="integer"/>
-        <attr name="labelTextColor" format="reference" />
+        <attr name="maxSelect" format="integer" />
+        <attr name="labelTextColor" format="reference|color" />
         <attr name="labelTextSize" format="dimension" />
         <attr name="labelTextPaddingLeft" format="dimension" />
         <attr name="labelTextPaddingTop" format="dimension" />
@@ -16,6 +16,6 @@
         <attr name="labelTextPaddingBottom" format="dimension" />
         <attr name="lineMargin" format="dimension" />
         <attr name="wordMargin" format="dimension" />
-        <attr name="labelBackground" format="reference" />
+        <attr name="labelBackground" format="reference|color" />
     </declare-styleable>
 </resources>
