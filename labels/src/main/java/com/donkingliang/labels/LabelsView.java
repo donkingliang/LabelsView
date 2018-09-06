@@ -381,6 +381,7 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
             for (int i = 0; i < size; i++) {
                 addLabel(labels.get(i), i, provider);
             }
+            ensureLabelClickable();
         }
 
         if (mSelectType == SelectType.SINGLE_IRREVOCABLY) {
@@ -411,6 +412,17 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
         label.setOnClickListener(this);
         addView(label);
         label.setText(provider.getLabelText(label, position, data));
+    }
+
+    /**
+     * 确保标签是否能响应事件，如果标签可选或者标签设置了点击事件监听，则响应事件。
+     */
+    private void ensureLabelClickable() {
+        int count = getChildCount();
+        for (int i = 0; i < count; i++) {
+            TextView label = (TextView) getChildAt(i);
+            label.setClickable(mLabelClickListener != null || mSelectType != SelectType.NONE);
+        }
     }
 
     @Override
@@ -778,6 +790,8 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
             if (mSelectType != SelectType.MULTI) {
                 mCompulsorys.clear();
             }
+
+            ensureLabelClickable();
         }
     }
 
@@ -811,6 +825,7 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
      */
     public void setOnLabelClickListener(OnLabelClickListener l) {
         mLabelClickListener = l;
+        ensureLabelClickable();
     }
 
     /**
