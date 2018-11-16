@@ -61,6 +61,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
+        // 设置最大显示行数，小于等于0则不限行数。
+//        labelsView.setMaxLines(1);
+
         findViewById(R.id.btn_none).setOnClickListener(this);
         findViewById(R.id.btn_single).setOnClickListener(this);
         findViewById(R.id.btn_multi).setOnClickListener(this);

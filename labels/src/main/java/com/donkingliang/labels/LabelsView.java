@@ -32,6 +32,7 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
     private int mLineMargin;
     private SelectType mSelectType;
     private int mMaxSelect;
+    private int mMaxLines;
 
     //用于保存label数据的key
     private static final int KEY_DATA = R.id.tag_key_data;
@@ -106,6 +107,7 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
             mSelectType = SelectType.get(type);
 
             mMaxSelect = mTypedArray.getInteger(R.styleable.labels_view_maxSelect, 0);
+            mMaxLines = mTypedArray.getInteger(R.styleable.labels_view_maxLines, 0);
             mTextColor = mTypedArray.getColorStateList(R.styleable.labels_view_labelTextColor);
             mTextSize = mTypedArray.getDimension(R.styleable.labels_view_labelTextSize,
                     sp2px(context, 14));
@@ -141,6 +143,7 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
         int maxLineWidth = 0; //记录最宽的行宽
         int maxItemHeight = 0; //记录一行中item高度最大的高度
         boolean begin = true; //是否是行的开头
+        int lineCount = 1;
 
         for (int i = 0; i < count; i++) {
             View view = getChildAt(i);
@@ -153,6 +156,10 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
             }
 
             if (maxWidth <= lineWidth + view.getMeasuredWidth()) {
+                lineCount++;
+                if (mMaxLines > 0 && lineCount > mMaxLines) {
+                    break;
+                }
                 contentHeight += mLineMargin;
                 contentHeight += maxItemHeight;
                 maxItemHeight = 0;
@@ -214,12 +221,17 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
 
         int contentWidth = right - left;
         int maxItemHeight = 0;
+        int lineCount = 1;
 
         int count = getChildCount();
         for (int i = 0; i < count; i++) {
             View view = getChildAt(i);
 
             if (contentWidth < x + view.getMeasuredWidth() + getPaddingRight()) {
+                lineCount++;
+                if (mMaxLines > 0 && lineCount > mMaxLines) {
+                    break;
+                }
                 x = getPaddingLeft();
                 y += mLineMargin;
                 y += maxItemHeight;
@@ -242,6 +254,7 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
     private static final String KEY_LINE_MARGIN_STATE = "key_line_margin_state";
     private static final String KEY_SELECT_TYPE_STATE = "key_select_type_state";
     private static final String KEY_MAX_SELECT_STATE = "key_max_select_state";
+    private static final String KEY_MAX_LINES_STATE = "key_max_lines_state";
     // 由于新版(1.4.0)的标签列表允许设置任何类型的数据，而不仅仅是String。并且标签显示的内容
     // 最终由LabelTextProvider提供，所以LabelsView不再在onSaveInstanceState()和onRestoreInstanceState()
     // 中保存和恢复标签列表的数据。
@@ -274,6 +287,9 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
         bundle.putInt(KEY_SELECT_TYPE_STATE, mSelectType.value);
         //保存标签的最大选择数量
         bundle.putInt(KEY_MAX_SELECT_STATE, mMaxSelect);
+        //保存标签的最大行数
+        bundle.putInt(KEY_MAX_LINES_STATE, mMaxLines);
+
         //保存标签列表
 //        if (!mLabels.isEmpty()) {
 //            bundle.putStringArrayList(KEY_LABELS_STATE, mLabels);
@@ -323,6 +339,9 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
             setSelectType(SelectType.get(bundle.getInt(KEY_SELECT_TYPE_STATE, mSelectType.value)));
             //恢复标签的最大选择数量
             setMaxSelect(bundle.getInt(KEY_MAX_SELECT_STATE, mMaxSelect));
+            //恢复标签的最大行数
+            setMaxLines(bundle.getInt(KEY_MAX_LINES_STATE, mMaxLines));
+
 //            //恢复标签列表
 //            ArrayList<String> labels = bundle.getStringArrayList(KEY_LABELS_STATE);
 //            if (labels != null && !labels.isEmpty()) {
@@ -816,6 +835,22 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
 
     public int getMaxSelect() {
         return mMaxSelect;
+    }
+
+    /**
+     * 设置最大行数，小于等于0则不限行数。
+     *
+     * @param maxLines
+     */
+    public void setMaxLines(int maxLines) {
+        if (mMaxLines != maxLines) {
+            mMaxLines = maxLines;
+            requestLayout();
+        }
+    }
+
+    public int getMaxLines() {
+        return mMaxLines;
     }
 
     /**
