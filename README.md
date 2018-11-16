@@ -15,7 +15,7 @@ allprojects {
 在Module的build.gradle在添加以下代码
 ```
 dependencies {
-    compile 'com.github.donkingliang:LabelsView:1.4.5'
+    compile 'com.github.donkingliang:LabelsView:1.4.6'
 }
 ```
 
@@ -37,6 +37,7 @@ dependencies {
        app:lineMargin="10dp"   //行与行的距离
        app:wordMargin="10dp"   //标签与标签的距离
        app:selectType="SINGLE"   //标签的选择类型 有单选(可反选)、单选(不可反选)、多选、不可选四种类型
+       app:maxLines="3"    // 设置最大显示行数，小于等于0则不限行数。
        app:maxSelect="5" />  //标签的最大选择数量，只有多选的时候才有用，0为不限数量
 ```
 这里有两个地方需要说明一下：
@@ -179,6 +180,9 @@ public void setLineMargin(int margin);
 
 //设置标签的间隔
 public void setWordMargin(int margin);
+
+// 设置最大显示行数，小于等于0则不限行数。
+labelsView.setMaxLines(1);
 ```
 所有的set方法都有对应的get方法，这里就不说了。
 
