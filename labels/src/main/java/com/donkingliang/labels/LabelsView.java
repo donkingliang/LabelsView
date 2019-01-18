@@ -142,20 +142,13 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
         int lineWidth = 0; //记录行的宽度
         int maxLineWidth = 0; //记录最宽的行宽
         int maxItemHeight = 0; //记录一行中item高度最大的高度
-        boolean begin = true; //是否是行的开头
         int lineCount = 1;
 
         for (int i = 0; i < count; i++) {
             View view = getChildAt(i);
             measureChild(view, widthMeasureSpec, heightMeasureSpec);
 
-            if (!begin) {
-                lineWidth += mWordMargin;
-            } else {
-                begin = false;
-            }
-
-            if (maxWidth <= lineWidth + view.getMeasuredWidth()) {
+            if (lineWidth + view.getMeasuredWidth() > maxWidth) {
                 lineCount++;
                 if (mMaxLines > 0 && lineCount > mMaxLines) {
                     break;
@@ -165,11 +158,27 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
                 maxItemHeight = 0;
                 maxLineWidth = Math.max(maxLineWidth, lineWidth);
                 lineWidth = 0;
-                begin = true;
             }
-            maxItemHeight = Math.max(maxItemHeight, view.getMeasuredHeight());
 
             lineWidth += view.getMeasuredWidth();
+            maxItemHeight = Math.max(maxItemHeight, view.getMeasuredHeight());
+
+            if (i != count -1) {
+                if (lineWidth + mWordMargin > maxWidth) {
+                    // 换行
+                    lineCount++;
+                    if (mMaxLines > 0 && lineCount > mMaxLines) {
+                        break;
+                    }
+                    contentHeight += mLineMargin;
+                    contentHeight += maxItemHeight;
+                    maxItemHeight = 0;
+                    maxLineWidth = Math.max(maxLineWidth, lineWidth);
+                    lineWidth = 0;
+                } else {
+                    lineWidth += mWordMargin;
+                }
+            }
         }
 
         contentHeight += maxItemHeight;
