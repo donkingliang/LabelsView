@@ -869,13 +869,13 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
 
     /**
      * 设置最少的选择数量，只有selectType等于MULTI时有效。
-     * 注意：mMinSelect只限制用户手动点击取消选中时的效果。
-     * 调用setSelects()、clearAllSelect()等方法改变标签的选中状态时，不受mMinSelect影响。
+     * 注意：minSelect只限制用户手动点击取消选中时的效果。
+     * 调用setSelects()、clearAllSelect()等方法改变标签的选中状态时，不受minSelect影响。
      *
-     * @param mMinSelect
+     * @param minSelect
      */
-    public void setMinSelect(int mMinSelect) {
-        this.mMinSelect = mMinSelect;
+    public void setMinSelect(int minSelect) {
+        this.mMinSelect = minSelect;
     }
 
     public int getMinSelect() {
