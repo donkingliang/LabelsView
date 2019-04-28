@@ -32,7 +32,10 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
     private int mLineMargin;
     private SelectType mSelectType;
     private int mMaxSelect;
+    private int mMinSelect;
     private int mMaxLines;
+
+    private boolean isIndicator; //只能看，不能手动改变选中状态。
 
     //用于保存label数据的key
     private static final int KEY_DATA = R.id.tag_key_data;
@@ -107,7 +110,9 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
             mSelectType = SelectType.get(type);
 
             mMaxSelect = mTypedArray.getInteger(R.styleable.labels_view_maxSelect, 0);
+            mMinSelect = mTypedArray.getInteger(R.styleable.labels_view_minSelect, 0);
             mMaxLines = mTypedArray.getInteger(R.styleable.labels_view_maxLines, 0);
+            isIndicator = mTypedArray.getBoolean(R.styleable.labels_view_isIndicator, false);
             mTextColor = mTypedArray.getColorStateList(R.styleable.labels_view_labelTextColor);
             mTextSize = mTypedArray.getDimension(R.styleable.labels_view_labelTextSize,
                     sp2px(context, 14));
@@ -163,7 +168,7 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
             lineWidth += view.getMeasuredWidth();
             maxItemHeight = Math.max(maxItemHeight, view.getMeasuredHeight());
 
-            if (i != count -1) {
+            if (i != count - 1) {
                 if (lineWidth + mWordMargin > maxWidth) {
                     // 换行
                     lineCount++;
@@ -263,7 +268,9 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
     private static final String KEY_LINE_MARGIN_STATE = "key_line_margin_state";
     private static final String KEY_SELECT_TYPE_STATE = "key_select_type_state";
     private static final String KEY_MAX_SELECT_STATE = "key_max_select_state";
+    private static final String KEY_MIN_SELECT_STATE = "key_min_select_state";
     private static final String KEY_MAX_LINES_STATE = "key_max_lines_state";
+    private static final String KEY_INDICATOR_STATE = "key_indicator_state";
     // 由于新版(1.4.0)的标签列表允许设置任何类型的数据，而不仅仅是String。并且标签显示的内容
     // 最终由LabelTextProvider提供，所以LabelsView不再在onSaveInstanceState()和onRestoreInstanceState()
     // 中保存和恢复标签列表的数据。
@@ -296,8 +303,12 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
         bundle.putInt(KEY_SELECT_TYPE_STATE, mSelectType.value);
         //保存标签的最大选择数量
         bundle.putInt(KEY_MAX_SELECT_STATE, mMaxSelect);
+        //保存标签的最少选择数量
+        bundle.putInt(KEY_MIN_SELECT_STATE, mMinSelect);
         //保存标签的最大行数
         bundle.putInt(KEY_MAX_LINES_STATE, mMaxLines);
+        //保存是否是指示器模式
+        bundle.putBoolean(KEY_INDICATOR_STATE, isIndicator);
 
         //保存标签列表
 //        if (!mLabels.isEmpty()) {
@@ -348,8 +359,12 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
             setSelectType(SelectType.get(bundle.getInt(KEY_SELECT_TYPE_STATE, mSelectType.value)));
             //恢复标签的最大选择数量
             setMaxSelect(bundle.getInt(KEY_MAX_SELECT_STATE, mMaxSelect));
+            //恢复标签的最少选择数量
+            setMinSelect(bundle.getInt(KEY_MIN_SELECT_STATE, mMinSelect));
             //恢复标签的最大行数
             setMaxLines(bundle.getInt(KEY_MAX_LINES_STATE, mMaxLines));
+            //恢复是否是指示器模式
+            setIndicator(bundle.getBoolean(KEY_INDICATOR_STATE, isIndicator));
 
 //            //恢复标签列表
 //            ArrayList<String> labels = bundle.getStringArrayList(KEY_LABELS_STATE);
@@ -457,18 +472,24 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
     public void onClick(View v) {
         if (v instanceof TextView) {
             TextView label = (TextView) v;
-            if (mSelectType != SelectType.NONE) {
-                if (label.isSelected()) {
-                    if (mSelectType != SelectType.SINGLE_IRREVOCABLY
-                            && !mCompulsorys.contains((Integer) label.getTag(KEY_POSITION))) {
-                        setLabelSelect(label, false);
+            if (!isIndicator) {
+                if (mSelectType != SelectType.NONE) {
+                    if (label.isSelected()) {
+                        boolean irrevocable = mSelectType == SelectType.MULTI && mCompulsorys.contains((Integer) label.getTag(KEY_POSITION));
+                        irrevocable = irrevocable || (mSelectType == SelectType.MULTI && mSelectLabels.size() <= mMinSelect);
+                        irrevocable = irrevocable || mSelectType == SelectType.SINGLE_IRREVOCABLY;
+                        if (!irrevocable) {
+                            setLabelSelect(label, false);
+                        }
+                    } else {
+                        if (mSelectType == SelectType.SINGLE || mSelectType == SelectType.SINGLE_IRREVOCABLY) {
+                            innerClearAllSelect();
+                            setLabelSelect(label, true);
+                        } else if (mSelectType == SelectType.MULTI
+                                && (mMaxSelect <= 0 || mMaxSelect > mSelectLabels.size())) {
+                            setLabelSelect(label, true);
+                        }
                     }
-                } else if (mSelectType == SelectType.SINGLE || mSelectType == SelectType.SINGLE_IRREVOCABLY) {
-                    innerClearAllSelect();
-                    setLabelSelect(label, true);
-                } else if (mSelectType == SelectType.MULTI
-                        && (mMaxSelect <= 0 || mMaxSelect > mSelectLabels.size())) {
-                    setLabelSelect(label, true);
                 }
             }
 
@@ -828,7 +849,7 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
     }
 
     /**
-     * 设置最大的选择数量
+     * 设置最大的选择数量，只有selectType等于MULTI时有效。
      *
      * @param maxSelect
      */
@@ -847,6 +868,21 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
     }
 
     /**
+     * 设置最少的选择数量，只有selectType等于MULTI时有效。
+     * 注意：mMinSelect只限制用户手动点击取消选中时的效果。
+     * 调用setSelects()、clearAllSelect()等方法改变标签的选中状态时，不受mMinSelect影响。
+     *
+     * @param mMinSelect
+     */
+    public void setMinSelect(int mMinSelect) {
+        this.mMinSelect = mMinSelect;
+    }
+
+    public int getMinSelect() {
+        return mMinSelect;
+    }
+
+    /**
      * 设置最大行数，小于等于0则不限行数。
      *
      * @param maxLines
@@ -860,6 +896,20 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
 
     public int getMaxLines() {
         return mMaxLines;
+    }
+
+    /**
+     * 设置为指示器模式，只能看，不能手动操作。这种模式下，用户不能通过手动点击改变标签的选中状态。
+     * 但是仍然可以通过调用setSelects()、clearAllSelect()等方法改变标签的选中状态。
+     *
+     * @param indicator
+     */
+    public void setIndicator(boolean indicator) {
+        isIndicator = indicator;
+    }
+
+    public boolean isIndicator() {
+        return isIndicator;
     }
 
     /**

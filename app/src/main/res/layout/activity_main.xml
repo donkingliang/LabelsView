@@ -52,13 +52,34 @@
             android:text="多选(最多5个)" />
 
         <Button
+            android:id="@+id/btn_multi_1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:text="多选(最少1)" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <Button
             android:id="@+id/btn_multi_compulsory"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="5dp"
             android:text="多选(1,2必选)" />
 
+        <Button
+            android:id="@+id/btn_indicator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:text="指示器模式" />
+
     </LinearLayout>
+
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -77,8 +98,8 @@
             android:layout_height="wrap_content"
             android:layout_margin="5dp"
             android:text="点击" />
-    </LinearLayout>
 
+    </LinearLayout>
 
     <com.donkingliang.labels.LabelsView xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/labels"
@@ -96,6 +117,7 @@
         app:labelTextSize="14sp"
         app:lineMargin="10dp"
         app:maxSelect="0"
-        app:selectType="SINGLE"
+        app:minSelect="1"
+        app:selectType="MULTI"
         app:wordMargin="10dp" />
 </LinearLayout>

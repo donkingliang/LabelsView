@@ -36,9 +36,11 @@ dependencies {
        app:labelTextPaddingTop="5dp"
        app:lineMargin="10dp"   //行与行的距离
        app:wordMargin="10dp"   //标签与标签的距离
-       app:selectType="SINGLE"   //标签的选择类型 有单选(可反选)、单选(不可反选)、多选、不可选四种类型
+     app:selectType="SINGLE"   //标签的选择类型 有单选(可反选)、单选(不可反选)、多选、不可选四种类型
        app:maxLines="3"    // 设置最大显示行数，小于等于0则不限行数。
-       app:maxSelect="5" />  //标签的最大选择数量，只有多选的时候才有用，0为不限数量
+       app:maxSelect="5"   //标签的最大选择数量，只有多选的时候才有用，0为不限数量
+       app:minSelect="5"   //标签的最少选择数量，只有多选的时候才有用，0为不限数量
+       app:isIndicator="true" />   //设置为指示器模式，不能手动改变标签的选中状态
 ```
 这里有两个地方需要说明一下：
 
@@ -152,8 +154,16 @@ public void clearAllSelect();
 //设置标签的选择类型，有NONE、SINGLE、SINGLE_IRREVOCABLY和MULTI四种类型。
 public void setSelectType(SelectType selectType);
 
-//设置最大的选择数量，只有selectType等于MULTI是有效。
+//设置最大的选择数量，只有selectType等于MULTI时有效。
 public void setMaxSelect(int maxSelect);
+
+//设置最少的选择数量，只有selectType等于MULTI时有效。
+//注意：mMinSelect只限制用户手动点击取消选中时的效果。调用setSelects()、clearAllSelect()等方法改变标签的选中状态时，不受mMinSelect影响。
+public void setMinSelect(int mMinSelect);
+
+//设置为指示器模式，只能看，不能手动操作。这种模式下，用户不能通过手动点击改变标签的选中状态。
+//但是仍然可以通过调用setSelects()、clearAllSelect()等方法改变标签的选中状态。
+public void setIndicator(boolean indicator)
 
 //设置必选项，只有在多项模式下，这个方法才有效
 public void setCompulsorys(int... positions)

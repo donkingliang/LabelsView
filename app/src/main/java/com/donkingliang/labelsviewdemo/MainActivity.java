@@ -42,18 +42,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //        labelsView.setLabels(label);
 
         ArrayList<TestBean> testList = new ArrayList<>();
-        testList.add(new TestBean("Android",1));
-        testList.add(new TestBean("IOS",2));
-        testList.add(new TestBean("前端",3));
-        testList.add(new TestBean("后台",4));
-        testList.add(new TestBean("微信开发",5));
-        testList.add(new TestBean("游戏开发",6));
-        testList.add(new TestBean("Java",7));
-        testList.add(new TestBean("JavaScript",8));
-        testList.add(new TestBean("C++",9));
-        testList.add(new TestBean("PHP",10));
-        testList.add(new TestBean("Python",11));
-        testList.add(new TestBean("Swift",12));
+        testList.add(new TestBean("Android", 1));
+        testList.add(new TestBean("IOS", 2));
+        testList.add(new TestBean("前端", 3));
+        testList.add(new TestBean("后台", 4));
+        testList.add(new TestBean("微信开发", 5));
+        testList.add(new TestBean("游戏开发", 6));
+        testList.add(new TestBean("Java", 7));
+        testList.add(new TestBean("JavaScript", 8));
+        testList.add(new TestBean("C++", 9));
+        testList.add(new TestBean("PHP", 10));
+        testList.add(new TestBean("Python", 11));
+        testList.add(new TestBean("Swift", 12));
         labelsView.setLabels(testList, new LabelsView.LabelTextProvider<TestBean>() {
             @Override
             public CharSequence getLabelText(TextView label, int position, TestBean data) {
@@ -64,6 +64,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // 设置最大显示行数，小于等于0则不限行数。
 //        labelsView.setMaxLines(1);
 
+        labelsView.clearAllSelect();
+
         findViewById(R.id.btn_none).setOnClickListener(this);
         findViewById(R.id.btn_single).setOnClickListener(this);
         findViewById(R.id.btn_multi).setOnClickListener(this);
@@ -72,6 +74,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.btn_click).setOnClickListener(this);
         findViewById(R.id.btn_single_irrevocably).setOnClickListener(this);
         findViewById(R.id.btn_multi_compulsory).setOnClickListener(this);
+        findViewById(R.id.btn_multi_1).setOnClickListener(this);
+        findViewById(R.id.btn_indicator).setOnClickListener(this);
     }
 
     @Override
@@ -93,17 +97,36 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.btn_multi:
                 labelsView.setSelectType(LabelsView.SelectType.MULTI);
                 labelsView.setMaxSelect(0);
+                labelsView.setMinSelect(0);
                 break;
 
             case R.id.btn_multi_5:
                 labelsView.setSelectType(LabelsView.SelectType.MULTI);
                 labelsView.setMaxSelect(5);
+                labelsView.setMinSelect(0);
+                break;
+
+            case R.id.btn_multi_1:
+                labelsView.setSelectType(LabelsView.SelectType.MULTI);
+                labelsView.setMaxSelect(0);
+                labelsView.setMinSelect(1);
                 break;
 
             case R.id.btn_multi_compulsory:
                 labelsView.setSelectType(LabelsView.SelectType.MULTI);
                 labelsView.setMaxSelect(0);
-                labelsView.setCompulsorys(0,1);
+                labelsView.setMinSelect(0);
+                labelsView.setCompulsorys(0, 1);
+                break;
+
+            case R.id.btn_indicator:
+
+                labelsView.setIndicator(!labelsView.isIndicator());
+                if (labelsView.isIndicator()) {
+                    ((TextView) v).setText("取消指示器模式");
+                } else {
+                    ((TextView) v).setText("指示器模式");
+                }
                 break;
 
             case R.id.btn_un_select:
