@@ -9,9 +9,12 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -24,6 +27,9 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
     private ColorStateList mTextColor;
     private float mTextSize;
     private Drawable mLabelBg;
+    private int mLabelWidth = -2;
+    private int mLabelHeight = -2;
+    private int mLabelGravity = Gravity.CENTER;
     private int mTextPaddingLeft;
     private int mTextPaddingTop;
     private int mTextPaddingRight;
@@ -89,18 +95,21 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
     public LabelsView(Context context) {
         super(context);
         mContext = context;
+        showEditPreview();
     }
 
     public LabelsView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mContext = context;
         getAttrs(context, attrs);
+        showEditPreview();
     }
 
     public LabelsView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         mContext = context;
         getAttrs(context, attrs);
+        showEditPreview();
     }
 
     private void getAttrs(Context context, AttributeSet attrs) {
@@ -113,33 +122,72 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
             mMinSelect = mTypedArray.getInteger(R.styleable.labels_view_minSelect, 0);
             mMaxLines = mTypedArray.getInteger(R.styleable.labels_view_maxLines, 0);
             isIndicator = mTypedArray.getBoolean(R.styleable.labels_view_isIndicator, false);
-            mTextColor = mTypedArray.getColorStateList(R.styleable.labels_view_labelTextColor);
-            mTextSize = mTypedArray.getDimension(R.styleable.labels_view_labelTextSize,
-                    sp2px(context, 14));
-            mTextPaddingLeft = mTypedArray.getDimensionPixelOffset(
-                    R.styleable.labels_view_labelTextPaddingLeft, 0);
-            mTextPaddingTop = mTypedArray.getDimensionPixelOffset(
-                    R.styleable.labels_view_labelTextPaddingTop, 0);
-            mTextPaddingRight = mTypedArray.getDimensionPixelOffset(
-                    R.styleable.labels_view_labelTextPaddingRight, 0);
-            mTextPaddingBottom = mTypedArray.getDimensionPixelOffset(
-                    R.styleable.labels_view_labelTextPaddingBottom, 0);
-            mLineMargin = mTypedArray.getDimensionPixelOffset(R.styleable.labels_view_lineMargin, 0);
-            mWordMargin = mTypedArray.getDimensionPixelOffset(R.styleable.labels_view_wordMargin, 0);
-            int labelBgResId = mTypedArray.getResourceId(R.styleable.labels_view_labelBackground, 0);
-            if (labelBgResId != 0) {
-                mLabelBg = getResources().getDrawable(labelBgResId);
+
+            mLabelGravity = mTypedArray.getInt(R.styleable.labels_view_labelGravity, mLabelGravity);
+            mLabelWidth = mTypedArray.getLayoutDimension(R.styleable.labels_view_labelTextWidth, mLabelWidth);
+            mLabelHeight = mTypedArray.getLayoutDimension(R.styleable.labels_view_labelTextHeight, mLabelHeight);
+
+            if (mTypedArray.hasValue(R.styleable.labels_view_labelTextColor)) {
+                mTextColor = mTypedArray.getColorStateList(R.styleable.labels_view_labelTextColor);
             } else {
-                int labelBgColor = mTypedArray.getColor(R.styleable.labels_view_labelBackground, Color.TRANSPARENT);
-                mLabelBg = new ColorDrawable(labelBgColor);
+                mTextColor = ColorStateList.valueOf(0xFF000000);
             }
+
+            mTextSize = mTypedArray.getDimension(R.styleable.labels_view_labelTextSize,
+                    sp2px(14));
+            if (mTypedArray.hasValue(R.styleable.labels_view_labelTextPadding)) {
+                int textPadding = mTypedArray.getDimensionPixelOffset(
+                        R.styleable.labels_view_labelTextPadding, 0);
+                mTextPaddingLeft = mTextPaddingTop = mTextPaddingRight = mTextPaddingBottom = textPadding;
+            } else {
+                mTextPaddingLeft = mTypedArray.getDimensionPixelOffset(
+                        R.styleable.labels_view_labelTextPaddingLeft, dp2px(10));
+                mTextPaddingTop = mTypedArray.getDimensionPixelOffset(
+                        R.styleable.labels_view_labelTextPaddingTop, dp2px(5));
+                mTextPaddingRight = mTypedArray.getDimensionPixelOffset(
+                        R.styleable.labels_view_labelTextPaddingRight, dp2px(10));
+                mTextPaddingBottom = mTypedArray.getDimensionPixelOffset(
+                        R.styleable.labels_view_labelTextPaddingBottom, dp2px(5));
+            }
+
+            mLineMargin = mTypedArray.getDimensionPixelOffset(R.styleable.labels_view_lineMargin, dp2px(5));
+            mWordMargin = mTypedArray.getDimensionPixelOffset(R.styleable.labels_view_wordMargin, dp2px(5));
+            if (mTypedArray.hasValue(R.styleable.labels_view_labelBackground)) {
+                int labelBgResId = mTypedArray.getResourceId(R.styleable.labels_view_labelBackground, 0);
+                if (labelBgResId != 0) {
+                    mLabelBg = getResources().getDrawable(labelBgResId);
+                } else {
+                    int labelBgColor = mTypedArray.getColor(R.styleable.labels_view_labelBackground, Color.TRANSPARENT);
+                    mLabelBg = new ColorDrawable(labelBgColor);
+                }
+            } else {
+                mLabelBg = getResources().getDrawable(R.drawable.default_label_bg);
+            }
+
             mTypedArray.recycle();
+        }
+    }
+
+    /**
+     * 编辑预览
+     */
+    private void showEditPreview() {
+        if (isInEditMode()) {
+//            测试的数据
+            ArrayList<String> label = new ArrayList<>();
+            label.add("Label 1");
+            label.add("Label 2");
+            label.add("Label 3");
+            label.add("Label 4");
+            label.add("Label 5");
+            label.add("Label 6");
+            label.add("Label 7");
+            setLabels(label);
         }
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-
         int count = getChildCount();
         int maxWidth = MeasureSpec.getSize(widthMeasureSpec) - getPaddingLeft() - getPaddingRight();
 
@@ -229,7 +277,6 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-
         int x = getPaddingLeft();
         int y = getPaddingTop();
 
@@ -277,6 +324,9 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
     private static final String KEY_LABELS_STATE = "key_labels_state";
     private static final String KEY_SELECT_LABELS_STATE = "key_select_labels_state";
     private static final String KEY_COMPULSORY_LABELS_STATE = "key_select_compulsory_state";
+    private static final String KEY_LABEL_WIDTH_STATE = "key_label_width_state";
+    private static final String KEY_LABEL_HEIGHT_STATE = "key_label_height_state";
+    private static final String KEY_LABEL_GRAVITY_STATE = "key_label_gravity_state";
 
     @Override
     protected Parcelable onSaveInstanceState() {
@@ -292,6 +342,11 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
         bundle.putFloat(KEY_TEXT_SIZE_STATE, mTextSize);
         //保存标签背景 (由于背景改用Drawable,所以不能自动保存和恢复)
 //        bundle.putInt(KEY_BG_RES_ID_STATE, mLabelBgResId);
+        //保存标签宽高
+        bundle.putInt(KEY_LABEL_WIDTH_STATE, mLabelWidth);
+        bundle.putInt(KEY_LABEL_HEIGHT_STATE, mLabelHeight);
+        //保存标签方向
+        bundle.putInt(KEY_LABEL_GRAVITY_STATE, mLabelGravity);
         //保存标签内边距
         bundle.putIntArray(KEY_PADDING_STATE, new int[]{mTextPaddingLeft, mTextPaddingTop,
                 mTextPaddingRight, mTextPaddingBottom});
@@ -346,6 +401,11 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
 //            if (resId != 0) {
 //                setLabelBackgroundResource(resId);
 //            }
+            //恢复标签宽高
+            mLabelWidth = bundle.getInt(KEY_LABEL_WIDTH_STATE, mLabelWidth);
+            mLabelHeight = bundle.getInt(KEY_LABEL_HEIGHT_STATE, mLabelHeight);
+            //恢复标签方向
+            mLabelGravity = bundle.getInt(KEY_LABEL_GRAVITY_STATE, mLabelGravity);
             //恢复标签内边距
             int[] padding = bundle.getIntArray(KEY_PADDING_STATE);
             if (padding != null && padding.length == 4) {
@@ -445,7 +505,8 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
         final TextView label = new TextView(mContext);
         label.setPadding(mTextPaddingLeft, mTextPaddingTop, mTextPaddingRight, mTextPaddingBottom);
         label.setTextSize(TypedValue.COMPLEX_UNIT_PX, mTextSize);
-        label.setTextColor(mTextColor != null ? mTextColor : ColorStateList.valueOf(0xFF000000));
+        label.setGravity(mLabelGravity);
+        label.setTextColor(mTextColor);
         //设置给label的背景(Drawable)是一个Drawable对象的拷贝，
         // 因为如果所有的标签都共用一个Drawable对象，会引起背景错乱。
         label.setBackgroundDrawable(mLabelBg.getConstantState().newDrawable());
@@ -453,7 +514,7 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
         label.setTag(KEY_DATA, data);
         label.setTag(KEY_POSITION, position);
         label.setOnClickListener(this);
-        addView(label);
+        addView(label, mLabelWidth, mLabelHeight);
         label.setText(provider.getLabelText(label, position, data));
     }
 
@@ -785,12 +846,32 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
         int count = getChildCount();
         for (int i = 0; i < count; i++) {
             TextView label = (TextView) getChildAt(i);
-            label.setTextColor(mTextColor != null ? mTextColor : ColorStateList.valueOf(0xFF000000));
+            label.setTextColor(mTextColor);
         }
     }
 
     public ColorStateList getLabelTextColor() {
         return mTextColor;
+    }
+
+    /**
+     * 设置标签显示方向
+     *
+     * @param gravity
+     */
+    public void setLabelGravity(int gravity) {
+        if (mLabelGravity != gravity) {
+            mLabelGravity = gravity;
+            int count = getChildCount();
+            for (int i = 0; i < count; i++) {
+                TextView label = (TextView) getChildAt(i);
+                label.setGravity(gravity);
+            }
+        }
+    }
+
+    public int getLabelGravity() {
+        return mLabelGravity;
     }
 
     /**
@@ -934,9 +1015,17 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
     /**
      * sp转px
      */
-    public static int sp2px(Context context, float spVal) {
+    private int sp2px(float spVal) {
         return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP,
-                spVal, context.getResources().getDisplayMetrics());
+                spVal, getResources().getDisplayMetrics());
+    }
+
+    /**
+     * dp转px
+     */
+    private int dp2px(float dpVal) {
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                dpVal, getResources().getDisplayMetrics());
     }
 
     public interface OnLabelClickListener {

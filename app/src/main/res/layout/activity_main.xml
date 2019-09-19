@@ -101,23 +101,31 @@
 
     </LinearLayout>
 
-    <com.donkingliang.labels.LabelsView xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/labels"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:minHeight="25dp"
-        android:padding="5dp"
-        app:labelBackground="@drawable/label_bg"
-        app:labelTextColor="@drawable/label_text_color"
-        app:labelTextPaddingBottom="5dp"
-        app:labelTextPaddingLeft="10dp"
-        app:labelTextPaddingRight="10dp"
-        app:labelTextPaddingTop="5dp"
-        app:labelTextSize="14sp"
-        app:lineMargin="10dp"
-        app:maxSelect="0"
-        app:minSelect="1"
-        app:selectType="MULTI"
-        app:wordMargin="10dp" />
+        android:layout_height="match_parent">
+
+        <com.donkingliang.labels.LabelsView xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/labels"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:minHeight="25dp"
+            android:padding="5dp"
+            app:labelBackground="@drawable/label_bg"
+            app:labelTextColor="@drawable/label_text_color"
+            app:labelTextHeight="wrap_content"
+            app:labelTextPaddingBottom="5dp"
+            app:labelTextPaddingLeft="10dp"
+            app:labelTextPaddingRight="10dp"
+            app:labelTextPaddingTop="5dp"
+            app:labelTextSize="14sp"
+            app:labelTextWidth="100dp"
+            app:lineMargin="10dp"
+            app:maxSelect="0"
+            app:minSelect="1"
+            app:selectType="MULTI"
+            app:wordMargin="10dp" />
+    </ScrollView>
+
 </LinearLayout>
