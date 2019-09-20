@@ -9,12 +9,10 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -40,6 +38,7 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
     private int mMaxSelect;
     private int mMinSelect;
     private int mMaxLines;
+    private boolean isSingleLine = false;
 
     private boolean isIndicator; //只能看，不能手动改变选中状态。
 
@@ -164,6 +163,8 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
                 mLabelBg = getResources().getDrawable(R.drawable.default_label_bg);
             }
 
+            isSingleLine = mTypedArray.getBoolean(R.styleable.labels_view_singleLine, false);
+
             mTypedArray.recycle();
         }
     }
@@ -188,6 +189,44 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        if (isSingleLine) {
+            measureSingleLine(widthMeasureSpec, heightMeasureSpec);
+        } else {
+            measureMultiLine(widthMeasureSpec, heightMeasureSpec);
+        }
+    }
+
+    /**
+     * 测量单行模式
+     *
+     * @param widthMeasureSpec
+     * @param heightMeasureSpec
+     */
+    private void measureSingleLine(int widthMeasureSpec, int heightMeasureSpec) {
+        int count = getChildCount();
+        int contentWidth = 0; //记录内容的宽度
+        int maxItemHeight = 0; //记录一行中item高度最大的高度
+
+        for (int i = 0; i < count; i++) {
+            View view = getChildAt(i);
+            measureChild(view, widthMeasureSpec, heightMeasureSpec);
+            contentWidth += view.getMeasuredWidth();
+            if (i != count - 1) {
+                contentWidth += mWordMargin;
+            }
+            maxItemHeight = Math.max(maxItemHeight, view.getMeasuredHeight());
+        }
+        setMeasuredDimension(measureSize(widthMeasureSpec, contentWidth + getPaddingLeft() + getPaddingRight()),
+                measureSize(heightMeasureSpec, maxItemHeight + getPaddingTop() + getPaddingBottom()));
+    }
+
+    /**
+     * 测量多行模式
+     *
+     * @param widthMeasureSpec
+     * @param heightMeasureSpec
+     */
+    private void measureMultiLine(int widthMeasureSpec, int heightMeasureSpec) {
         int count = getChildCount();
         int maxWidth = MeasureSpec.getSize(widthMeasureSpec) - getPaddingLeft() - getPaddingRight();
 
@@ -237,11 +276,11 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
         contentHeight += maxItemHeight;
         maxLineWidth = Math.max(maxLineWidth, lineWidth);
 
-        setMeasuredDimension(measureWidth(widthMeasureSpec, maxLineWidth),
-                measureHeight(heightMeasureSpec, contentHeight));
+        setMeasuredDimension(measureSize(widthMeasureSpec, maxLineWidth + getPaddingLeft() + getPaddingRight()),
+                measureSize(heightMeasureSpec, contentHeight + getPaddingTop() + getPaddingBottom()));
     }
 
-    private int measureWidth(int measureSpec, int contentWidth) {
+    private int measureSize(int measureSpec, int size) {
         int result = 0;
         int specMode = MeasureSpec.getMode(measureSpec);
         int specSize = MeasureSpec.getSize(measureSpec);
@@ -249,29 +288,13 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
         if (specMode == MeasureSpec.EXACTLY) {
             result = specSize;
         } else {
-            result = contentWidth + getPaddingLeft() + getPaddingRight();
+            result = size;
             if (specMode == MeasureSpec.AT_MOST) {
                 result = Math.min(result, specSize);
             }
         }
         result = Math.max(result, getSuggestedMinimumWidth());
-        return result;
-    }
-
-    private int measureHeight(int measureSpec, int contentHeight) {
-        int result = 0;
-        int specMode = MeasureSpec.getMode(measureSpec);
-        int specSize = MeasureSpec.getSize(measureSpec);
-
-        if (specMode == MeasureSpec.EXACTLY) {
-            result = specSize;
-        } else {
-            result = contentHeight + getPaddingTop() + getPaddingBottom();
-            if (specMode == MeasureSpec.AT_MOST) {
-                result = Math.min(result, specSize);
-            }
-        }
-        result = Math.max(result, getSuggestedMinimumHeight());
+        result = resolveSizeAndState(result, measureSpec, 0);
         return result;
     }
 
@@ -288,7 +311,7 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
         for (int i = 0; i < count; i++) {
             View view = getChildAt(i);
 
-            if (contentWidth < x + view.getMeasuredWidth() + getPaddingRight()) {
+            if (!isSingleLine && contentWidth < x + view.getMeasuredWidth() + getPaddingRight()) {
                 lineCount++;
                 if (mMaxLines > 0 && lineCount > mMaxLines) {
                     break;
@@ -327,6 +350,7 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
     private static final String KEY_LABEL_WIDTH_STATE = "key_label_width_state";
     private static final String KEY_LABEL_HEIGHT_STATE = "key_label_height_state";
     private static final String KEY_LABEL_GRAVITY_STATE = "key_label_gravity_state";
+    private static final String KEY_SINGLE_LINE_STATE = "key_single_line_state";
 
     @Override
     protected Parcelable onSaveInstanceState() {
@@ -379,6 +403,8 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
             bundle.putIntegerArrayList(KEY_COMPULSORY_LABELS_STATE, mCompulsorys);
         }
 
+        bundle.putBoolean(KEY_SINGLE_LINE_STATE, isSingleLine);
+
         return bundle;
     }
 
@@ -405,7 +431,7 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
             mLabelWidth = bundle.getInt(KEY_LABEL_WIDTH_STATE, mLabelWidth);
             mLabelHeight = bundle.getInt(KEY_LABEL_HEIGHT_STATE, mLabelHeight);
             //恢复标签方向
-            mLabelGravity = bundle.getInt(KEY_LABEL_GRAVITY_STATE, mLabelGravity);
+            setLabelGravity(bundle.getInt(KEY_LABEL_GRAVITY_STATE, mLabelGravity));
             //恢复标签内边距
             int[] padding = bundle.getIntArray(KEY_PADDING_STATE);
             if (padding != null && padding.length == 4) {
@@ -425,6 +451,8 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
             setMaxLines(bundle.getInt(KEY_MAX_LINES_STATE, mMaxLines));
             //恢复是否是指示器模式
             setIndicator(bundle.getBoolean(KEY_INDICATOR_STATE, isIndicator));
+
+            setSingleLine(bundle.getBoolean(KEY_SINGLE_LINE_STATE, isSingleLine));
 
 //            //恢复标签列表
 //            ArrayList<String> labels = bundle.getStringArrayList(KEY_LABELS_STATE);
@@ -991,6 +1019,22 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
 
     public boolean isIndicator() {
         return isIndicator;
+    }
+
+    /**
+     * 设置单行显示
+     *
+     * @param isSingleLine
+     */
+    public void setSingleLine(boolean isSingleLine) {
+        if (this.isSingleLine != isSingleLine) {
+            this.isSingleLine = isSingleLine;
+            requestLayout();
+        }
+    }
+
+    public boolean isSingleLine() {
+        return isSingleLine;
     }
 
     /**

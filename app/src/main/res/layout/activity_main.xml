@@ -6,126 +6,45 @@
     android:background="#cccccc"
     android:orientation="vertical">
 
-    <LinearLayout
+    <com.donkingliang.labels.LabelsView xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/btnLabels"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:minHeight="25dp"
+        android:padding="5dp"
+        app:isIndicator="true"
+        app:labelBackground="#433f3f"
+        app:labelTextColor="#ffffff"
+        app:labelTextPaddingBottom="5dp"
+        app:labelTextPaddingLeft="10dp"
+        app:labelTextPaddingRight="10dp"
+        app:labelTextPaddingTop="5dp"
+        app:labelTextSize="14sp"
+        app:lineMargin="10dp"
+        app:selectType="NONE"
+        app:wordMargin="10dp" />
 
-        <Button
-            android:id="@+id/btn_none"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="5dp"
-            android:text="不可选中" />
-
-        <Button
-            android:id="@+id/btn_single"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="5dp"
-            android:text="单选(可反选)" />
-
-        <Button
-            android:id="@+id/btn_single_irrevocably"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="5dp"
-            android:text="单选(不可反选)" />
-
-    </LinearLayout>
-
-    <LinearLayout
+    <com.donkingliang.labels.LabelsView xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/labels"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <Button
-            android:id="@+id/btn_multi"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="5dp"
-            android:text="多选" />
-
-        <Button
-            android:id="@+id/btn_multi_5"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="5dp"
-            android:text="多选(最多5个)" />
-
-        <Button
-            android:id="@+id/btn_multi_1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="5dp"
-            android:text="多选(最少1)" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <Button
-            android:id="@+id/btn_multi_compulsory"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="5dp"
-            android:text="多选(1,2必选)" />
-
-        <Button
-            android:id="@+id/btn_indicator"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="5dp"
-            android:text="指示器模式" />
-
-    </LinearLayout>
-
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <Button
-            android:id="@+id/btn_un_select"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="5dp"
-            android:text="取消选中" />
-
-        <Button
-            android:id="@+id/btn_click"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="5dp"
-            android:text="点击" />
-
-    </LinearLayout>
-
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <com.donkingliang.labels.LabelsView xmlns:app="http://schemas.android.com/apk/res-auto"
-            android:id="@+id/labels"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:minHeight="25dp"
-            android:padding="5dp"
-            app:labelBackground="@drawable/label_bg"
-            app:labelTextColor="@drawable/label_text_color"
-            app:labelTextHeight="wrap_content"
-            app:labelTextPaddingBottom="5dp"
-            app:labelTextPaddingLeft="10dp"
-            app:labelTextPaddingRight="10dp"
-            app:labelTextPaddingTop="5dp"
-            app:labelTextSize="14sp"
-            app:labelTextWidth="100dp"
-            app:lineMargin="10dp"
-            app:maxSelect="0"
-            app:minSelect="1"
-            app:selectType="MULTI"
-            app:wordMargin="10dp" />
-    </ScrollView>
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:minHeight="25dp"
+        android:padding="5dp"
+        app:labelBackground="@drawable/label_bg"
+        app:labelTextColor="@drawable/label_text_color"
+        app:labelTextHeight="wrap_content"
+        app:labelTextPaddingBottom="5dp"
+        app:labelTextPaddingLeft="10dp"
+        app:labelTextPaddingRight="10dp"
+        app:labelTextPaddingTop="5dp"
+        app:labelTextSize="14sp"
+        app:labelTextWidth="wrap_content"
+        app:lineMargin="10dp"
+        app:maxSelect="0"
+        app:minSelect="1"
+        app:selectType="MULTI"
+        app:wordMargin="10dp" />
 
 </LinearLayout>

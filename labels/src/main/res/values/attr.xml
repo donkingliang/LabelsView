@@ -69,5 +69,6 @@
         <attr name="lineMargin" format="dimension" />
         <attr name="wordMargin" format="dimension" />
         <attr name="labelBackground" format="reference|color" />
+        <attr name="singleLine" format="boolean" />
     </declare-styleable>
 </resources>

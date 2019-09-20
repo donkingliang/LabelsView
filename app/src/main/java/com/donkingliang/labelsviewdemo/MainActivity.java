@@ -14,16 +14,32 @@ import java.util.List;
 
 import static com.donkingliang.labelsviewdemo.R.id.labels;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+public class MainActivity extends AppCompatActivity implements LabelsView.OnLabelClickListener {
 
+    private LabelsView btnLabels;
     private LabelsView labelsView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        btnLabels = findViewById(R.id.btnLabels);
+        labelsView = findViewById(labels);
 
-        labelsView = (LabelsView) findViewById(labels);
+        // 按钮组
+        ArrayList<String> btns = new ArrayList<>();
+        btns.add("不可选中");
+        btns.add("单选(可反选)");
+        btns.add("单选(不可反选)");
+        btns.add("多选");
+        btns.add("多选(最多5个)");
+        btns.add("多选(最少1个)");
+        btns.add("多选(1,2必选)");
+        btns.add("指示器模式");
+        btns.add("取消选中");
+        btns.add("点击");
+        btnLabels.setLabels(btns);
+        btnLabels.setOnLabelClickListener(this);
 
         //测试的数据
 //        ArrayList<String> label = new ArrayList<>();
@@ -54,66 +70,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         testList.add(new TestBean("PHP", 10));
         testList.add(new TestBean("Python", 11));
         testList.add(new TestBean("Swift", 12));
-        testList.add(new TestBean("Android", 1));
-        testList.add(new TestBean("IOS", 2));
-        testList.add(new TestBean("前端", 3));
-        testList.add(new TestBean("后台", 4));
-        testList.add(new TestBean("微信开发", 5));
-        testList.add(new TestBean("游戏开发", 6));
-        testList.add(new TestBean("Java", 7));
-        testList.add(new TestBean("JavaScript", 8));
-        testList.add(new TestBean("C++", 9));
-        testList.add(new TestBean("PHP", 10));
-        testList.add(new TestBean("Python", 11));
-        testList.add(new TestBean("Swift", 12));
-        testList.add(new TestBean("Android", 1));
-        testList.add(new TestBean("IOS", 2));
-        testList.add(new TestBean("前端", 3));
-        testList.add(new TestBean("后台", 4));
-        testList.add(new TestBean("微信开发", 5));
-        testList.add(new TestBean("游戏开发", 6));
-        testList.add(new TestBean("Java", 7));
-        testList.add(new TestBean("JavaScript", 8));
-        testList.add(new TestBean("C++", 9));
-        testList.add(new TestBean("PHP", 10));
-        testList.add(new TestBean("Python", 11));
-        testList.add(new TestBean("Swift", 12));
-        testList.add(new TestBean("Android", 1));
-        testList.add(new TestBean("IOS", 2));
-        testList.add(new TestBean("前端", 3));
-        testList.add(new TestBean("后台", 4));
-        testList.add(new TestBean("微信开发", 5));
-        testList.add(new TestBean("游戏开发", 6));
-        testList.add(new TestBean("Java", 7));
-        testList.add(new TestBean("JavaScript", 8));
-        testList.add(new TestBean("C++", 9));
-        testList.add(new TestBean("PHP", 10));
-        testList.add(new TestBean("Python", 11));
-        testList.add(new TestBean("Swift", 12));
-        testList.add(new TestBean("Android", 1));
-        testList.add(new TestBean("IOS", 2));
-        testList.add(new TestBean("前端", 3));
-        testList.add(new TestBean("后台", 4));
-        testList.add(new TestBean("微信开发", 5));
-        testList.add(new TestBean("游戏开发", 6));
-        testList.add(new TestBean("Java", 7));
-        testList.add(new TestBean("JavaScript", 8));
-        testList.add(new TestBean("C++", 9));
-        testList.add(new TestBean("PHP", 10));
-        testList.add(new TestBean("Python", 11));
-        testList.add(new TestBean("Swift", 12));
-        testList.add(new TestBean("Android", 1));
-        testList.add(new TestBean("IOS", 2));
-        testList.add(new TestBean("前端", 3));
-        testList.add(new TestBean("后台", 4));
-        testList.add(new TestBean("微信开发", 5));
-        testList.add(new TestBean("游戏开发", 6));
-        testList.add(new TestBean("Java", 7));
-        testList.add(new TestBean("JavaScript", 8));
-        testList.add(new TestBean("C++", 9));
-        testList.add(new TestBean("PHP", 10));
-        testList.add(new TestBean("Python", 11));
-        testList.add(new TestBean("Swift", 12));
 
         labelsView.setLabels(testList, new LabelsView.LabelTextProvider<TestBean>() {
             @Override
@@ -126,75 +82,66 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //        labelsView.setMaxLines(1);
 
         labelsView.clearAllSelect();
-
-        findViewById(R.id.btn_none).setOnClickListener(this);
-        findViewById(R.id.btn_single).setOnClickListener(this);
-        findViewById(R.id.btn_multi).setOnClickListener(this);
-        findViewById(R.id.btn_multi_5).setOnClickListener(this);
-        findViewById(R.id.btn_un_select).setOnClickListener(this);
-        findViewById(R.id.btn_click).setOnClickListener(this);
-        findViewById(R.id.btn_single_irrevocably).setOnClickListener(this);
-        findViewById(R.id.btn_multi_compulsory).setOnClickListener(this);
-        findViewById(R.id.btn_multi_1).setOnClickListener(this);
-        findViewById(R.id.btn_indicator).setOnClickListener(this);
     }
 
     @Override
-    public void onClick(View v) {
+    public void onLabelClick(TextView label, Object data, int position) {
         labelsView.setOnLabelClickListener(null);
-        switch (v.getId()) {
-            case R.id.btn_none:
+        labelsView.clearCompulsorys();
+        switch (position) {
+            case 0:
                 labelsView.setSelectType(LabelsView.SelectType.NONE);
                 break;
 
-            case R.id.btn_single:
+            case 1:
                 labelsView.setSelectType(LabelsView.SelectType.SINGLE);
                 break;
 
-            case R.id.btn_single_irrevocably:
+            case 2:
                 labelsView.setSelectType(LabelsView.SelectType.SINGLE_IRREVOCABLY);
                 break;
 
-            case R.id.btn_multi:
+            case 3:
                 labelsView.setSelectType(LabelsView.SelectType.MULTI);
                 labelsView.setMaxSelect(0);
                 labelsView.setMinSelect(0);
                 break;
 
-            case R.id.btn_multi_5:
+            case 4:
                 labelsView.setSelectType(LabelsView.SelectType.MULTI);
                 labelsView.setMaxSelect(5);
                 labelsView.setMinSelect(0);
                 break;
 
-            case R.id.btn_multi_1:
+            case 5:
                 labelsView.setSelectType(LabelsView.SelectType.MULTI);
                 labelsView.setMaxSelect(0);
                 labelsView.setMinSelect(1);
                 break;
 
-            case R.id.btn_multi_compulsory:
+            case 6:
                 labelsView.setSelectType(LabelsView.SelectType.MULTI);
                 labelsView.setMaxSelect(0);
                 labelsView.setMinSelect(0);
                 labelsView.setCompulsorys(0, 1);
                 break;
 
-            case R.id.btn_indicator:
-
+            case 7:
                 labelsView.setIndicator(!labelsView.isIndicator());
                 if (labelsView.isIndicator()) {
-                    ((TextView) v).setText("取消指示器模式");
+                    btnLabels.getLabels().set(position, "取消指示器模式");
+                    label.setText("取消指示器模式");
                 } else {
-                    ((TextView) v).setText("指示器模式");
+                    btnLabels.getLabels().set(position, "指示器模式");
+                    label.setText("指示器模式");
                 }
                 break;
 
-            case R.id.btn_un_select:
+            case 8:
                 labelsView.clearAllSelect();
                 break;
 
-            case R.id.btn_click:
+            case 9:
                 labelsView.setSelectType(LabelsView.SelectType.NONE);
                 labelsView.setOnLabelClickListener(new LabelsView.OnLabelClickListener() {
                     @Override
