@@ -15,7 +15,7 @@ allprojects {
 在Module的build.gradle在添加以下代码
 ```
 dependencies {
-    implementation 'com.github.donkingliang:LabelsView:1.5.0'
+    implementation 'com.github.donkingliang:LabelsView:1.6.0'
 }
 ```
 
@@ -41,6 +41,14 @@ dependencies {
        app:maxSelect="5"   //标签的最大选择数量，只有多选的时候才有用，0为不限数量
        app:minSelect="1"   //标签的最少选择数量，只有多选的时候才有用，0为不限数量
        app:isIndicator="true" />   //设置为指示器模式，不能手动改变标签的选中状态
+
+<!-- 其他属性 -->
+app:labelTextWidth="wrap_content"  // 标签项宽
+app:labelTextHeight="wrap_content"  // 标签项高
+app:labelGravity="center"  // 标签项的文本显示方向
+app:labelTextPadding="5dp"  // 标签的Padding
+app:singleLine="true"  // 单行显示，默认false
+
 ```
 这里有两个地方需要说明一下：
 
@@ -111,6 +119,9 @@ testList.add(new TestBean("游戏开发",6));
 labelsView.setLabels(testList, new LabelsView.LabelTextProvider<TestBean>() {
     @Override
     public CharSequence getLabelText(TextView label, int position, TestBean data) {
+    
+    	// label就是标签项，在这里可以对标签项单独设置一些属性，比如文本样式等。
+    
     	//根据data和position返回label需要显示的数据。
         return data.getName();
     }
@@ -192,11 +203,20 @@ public void setLineMargin(int margin);
 public void setWordMargin(int margin);
 
 // 设置最大显示行数，小于等于0则不限行数。
-labelsView.setMaxLines(1);
+public void setMaxLines(int maxLines);
+
+// 设置标签文本显示方向
+public void setLabelGravity(int gravity)；
+
+// 设置是否单行显示
+public void setMaxLines(int maxLines)；
+
+
 ```
 所有的set方法都有对应的get方法，这里就不说了。
 
 ### 效果图：
 ![效果图](https://github.com/donkingliang/LabelsView/blob/master/%E6%95%88%E6%9E%9C%E5%9B%BE.gif)  
+
 想要了解该控件的具体实现的同学，欢迎访问[我的博客](http://blog.csdn.net/u010177022)  
 [Android自定义标签列表控件LabelsView解析](http://blog.csdn.net/u010177022/article/details/60324117)
