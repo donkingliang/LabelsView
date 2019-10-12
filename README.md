@@ -15,7 +15,7 @@ allprojects {
 在Module的build.gradle在添加以下代码
 ```
 dependencies {
-    implementation 'com.github.donkingliang:LabelsView:1.6.0'
+    implementation 'com.github.donkingliang:LabelsView:1.6.1'
 }
 ```
 
@@ -145,7 +145,27 @@ labelsView.setOnLabelSelectChangeListener(new LabelsView.OnLabelSelectChangeList
     }
 });
 ```
-**5、常用方法**
+
+**5、设置标签选中事件拦截：**(如果需要的话)
+
+当希望某个标签在特定条件下不被选中/取消选中时，可以使用事件拦截。只有用户点击改变标签选中状态时才会回调拦截，用其他方法改变时不会回调这个方法，不会被拦截。点击选中/取消选中时，拦截事件，返回true时，表示事件被拦截，不会改变标签的选中状态。
+
+```java
+//设置标签选中状态的点击改变拦截器
+labelsView.setOnSelectChangeIntercept(new LabelsView.OnSelectChangeIntercept() {
+    @Override
+    public boolean onIntercept(TextView label, Object data, boolean oldSelect, boolean newSelect, int position) {
+        if (position == 0){
+            //拦截第一个标签的状态改变事件，不能选中和反选
+            return true;
+        } else {
+            return false;
+        }
+    }
+});
+```
+
+**6、常用方法**
 
 ```java
 //设置选中标签。
