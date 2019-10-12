@@ -56,6 +56,7 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
 
     private OnLabelClickListener mLabelClickListener;
     private OnLabelSelectChangeListener mLabelSelectChangeListener;
+    private OnSelectChangeIntercept mOnSelectChangeIntercept;
 
     /**
      * Label的选择类型
@@ -567,16 +568,20 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
                         boolean irrevocable = mSelectType == SelectType.MULTI && mCompulsorys.contains((Integer) label.getTag(KEY_POSITION));
                         irrevocable = irrevocable || (mSelectType == SelectType.MULTI && mSelectLabels.size() <= mMinSelect);
                         irrevocable = irrevocable || mSelectType == SelectType.SINGLE_IRREVOCABLY;
-                        if (!irrevocable) {
+                        if (!irrevocable&& !selectChangeIntercept(label)) {
                             setLabelSelect(label, false);
                         }
                     } else {
                         if (mSelectType == SelectType.SINGLE || mSelectType == SelectType.SINGLE_IRREVOCABLY) {
-                            innerClearAllSelect();
-                            setLabelSelect(label, true);
+                            if (!selectChangeIntercept(label)) {
+                                innerClearAllSelect();
+                                setLabelSelect(label, true);
+                            }
                         } else if (mSelectType == SelectType.MULTI
                                 && (mMaxSelect <= 0 || mMaxSelect > mSelectLabels.size())) {
-                            setLabelSelect(label, true);
+                            if (!selectChangeIntercept(label)) {
+                                setLabelSelect(label, true);
+                            }
                         }
                     }
                 }
@@ -601,6 +606,12 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
                         isSelect, (int) label.getTag(KEY_POSITION));
             }
         }
+    }
+
+    private boolean selectChangeIntercept(TextView label) {
+        return mOnSelectChangeIntercept != null && mOnSelectChangeIntercept.onIntercept(label,
+                label.getTag(KEY_DATA), label.isSelected(), !label.isSelected(),
+                (int) label.getTag(KEY_POSITION));
     }
 
     /**
@@ -1057,6 +1068,15 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
     }
 
     /**
+     * 设置标签选中状态的点击改变拦截器
+     *
+     * @param intercept
+     */
+    public void setOnSelectChangeIntercept(OnSelectChangeIntercept intercept) {
+        mOnSelectChangeIntercept = intercept;
+    }
+
+    /**
      * sp转px
      */
     private int sp2px(float spVal) {
@@ -1091,6 +1111,23 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
          * @param position 标签位置
          */
         void onLabelSelectChange(TextView label, Object data, boolean isSelect, int position);
+    }
+
+    /**
+     * 点击选中/取消选中时，拦截事件，返回true时，表示事件被拦截，不会改变标签的选中状态。
+     * 当希望某个标签在特定条件下不被选中/取消选中时，可以使用事件拦截。
+     * 只有用户点击改变标签选中状态时才会回调拦截，用其他方法改变时不会回调这个方法，不会被拦截。
+     */
+    public interface OnSelectChangeIntercept {
+
+        /**
+         * @param label     标签
+         * @param data      标签对应的数据
+         * @param oldSelect 旧选中状态
+         * @param newSelect 新选中状态
+         * @param position  标签位置
+         */
+        boolean onIntercept(TextView label, Object data, boolean oldSelect, boolean newSelect, int position);
     }
 
     /**
