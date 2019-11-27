@@ -18,7 +18,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LabelsView extends ViewGroup implements View.OnClickListener {
+public class LabelsView extends ViewGroup implements View.OnClickListener, View.OnLongClickListener {
 
     private Context mContext;
 
@@ -55,6 +55,7 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
     private ArrayList<Integer> mCompulsorys = new ArrayList<>();
 
     private OnLabelClickListener mLabelClickListener;
+    private OnLabelLongClickListener mLabelLongClickListener;
     private OnLabelSelectChangeListener mLabelSelectChangeListener;
     private OnSelectChangeIntercept mOnSelectChangeIntercept;
 
@@ -543,6 +544,7 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
         label.setTag(KEY_DATA, data);
         label.setTag(KEY_POSITION, position);
         label.setOnClickListener(this);
+        label.setOnLongClickListener(this);
         addView(label, mLabelWidth, mLabelHeight);
         label.setText(provider.getLabelText(label, position, data));
     }
@@ -554,7 +556,7 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
         int count = getChildCount();
         for (int i = 0; i < count; i++) {
             TextView label = (TextView) getChildAt(i);
-            label.setClickable(mLabelClickListener != null || mSelectType != SelectType.NONE);
+            label.setClickable(mLabelClickListener != null || mLabelLongClickListener != null || mSelectType != SelectType.NONE);
         }
     }
 
@@ -568,7 +570,7 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
                         boolean irrevocable = mSelectType == SelectType.MULTI && mCompulsorys.contains((Integer) label.getTag(KEY_POSITION));
                         irrevocable = irrevocable || (mSelectType == SelectType.MULTI && mSelectLabels.size() <= mMinSelect);
                         irrevocable = irrevocable || mSelectType == SelectType.SINGLE_IRREVOCABLY;
-                        if (!irrevocable&& !selectChangeIntercept(label)) {
+                        if (!irrevocable && !selectChangeIntercept(label)) {
                             setLabelSelect(label, false);
                         }
                     } else {
@@ -591,6 +593,18 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
                 mLabelClickListener.onLabelClick(label, label.getTag(KEY_DATA), (int) label.getTag(KEY_POSITION));
             }
         }
+    }
+
+    @Override
+    public boolean onLongClick(View v) {
+        if (v instanceof TextView) {
+            TextView label = (TextView) v;
+            if (mLabelLongClickListener != null) {
+                return mLabelLongClickListener.onLabelLongClick(label, label.getTag(KEY_DATA), (int) label.getTag(KEY_POSITION));
+            }
+        }
+
+        return false;
     }
 
     private void setLabelSelect(TextView label, boolean isSelect) {
@@ -1059,6 +1073,16 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
     }
 
     /**
+     * 设置标签的点击监听
+     *
+     * @param l
+     */
+    public void setOnLabelLongClickListener(OnLabelLongClickListener l) {
+        mLabelLongClickListener = l;
+        ensureLabelClickable();
+    }
+
+    /**
      * 设置标签的选择监听
      *
      * @param l
@@ -1100,6 +1124,16 @@ public class LabelsView extends ViewGroup implements View.OnClickListener {
          * @param position 标签位置
          */
         void onLabelClick(TextView label, Object data, int position);
+    }
+
+    public interface OnLabelLongClickListener {
+
+        /**
+         * @param label    标签
+         * @param data     标签对应的数据
+         * @param position 标签位置
+         */
+        boolean onLabelLongClick(TextView label, Object data, int position);
     }
 
     public interface OnLabelSelectChangeListener {
