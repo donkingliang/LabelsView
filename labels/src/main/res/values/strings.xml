@@ -1,7 +1,4 @@
 <resources>
-    <string name="app_name">labels</string>
-
     <item name="tag_key_data" type="id"/>
     <item name="tag_key_position" type="id"/>
-
 </resources>
