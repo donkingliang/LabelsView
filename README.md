@@ -15,7 +15,7 @@ allprojects {
 在Module的build.gradle在添加以下代码
 ```
 dependencies {
-    implementation 'com.github.donkingliang:LabelsView:1.6.1'
+    implementation 'com.github.donkingliang:LabelsView:1.6.2'
 }
 ```
 
@@ -137,6 +137,15 @@ labelsView.setOnLabelClickListener(new LabelsView.OnLabelClickListener() {
          //label是被点击的标签，data是标签所对应的数据，position是标签的位置。
     }
 });
+
+// 标签的长按监听
+labelsView.setOnLabelLongClickListener(new LabelsView.OnLabelLongClickListener() {
+    @Override
+    public boolean onLabelLongClick(TextView label, Object data, int position) {
+        return false;
+    }
+});
+
 //标签的选中监听
 labelsView.setOnLabelSelectChangeListener(new LabelsView.OnLabelSelectChangeListener() {
     @Override
