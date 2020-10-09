@@ -225,7 +225,9 @@ public class LabelsView extends ViewGroup implements View.OnClickListener, View.
         }
         setMeasuredDimension(measureSize(widthMeasureSpec, contentWidth + getPaddingLeft() + getPaddingRight()),
                 measureSize(heightMeasureSpec, maxItemHeight + getPaddingTop() + getPaddingBottom()));
-        lines = 1;
+
+        // 如果count等于0，没有标签，则lines为0
+        lines = count > 0 ? 1 : 0;
     }
 
     /**
@@ -282,12 +284,14 @@ public class LabelsView extends ViewGroup implements View.OnClickListener, View.
                 }
             }
         }
-        this.lines = lineCount;
         contentHeight += maxItemHeight;
         maxLineWidth = Math.max(maxLineWidth, lineWidth);
 
         setMeasuredDimension(measureSize(widthMeasureSpec, maxLineWidth + getPaddingLeft() + getPaddingRight()),
                 measureSize(heightMeasureSpec, contentHeight + getPaddingTop() + getPaddingBottom()));
+
+        // 如果count等于0，没有标签，则lines为0
+        lines = count > 0 ? lineCount : 0;
     }
 
     private int measureSize(int measureSpec, int size) {
@@ -940,6 +944,27 @@ public class LabelsView extends ViewGroup implements View.OnClickListener, View.
     }
 
     /**
+     * 设置标签字体是否为粗体
+     *
+     * @param isBold
+     */
+    public void setTextBold(boolean isBold) {
+        if (this.isTextBold != isBold) {
+            this.isTextBold = isBold;
+            int count = getChildCount();
+            for (int i = 0; i < count; i++) {
+                TextView label = (TextView) getChildAt(i);
+                label.getPaint().setFakeBoldText(isTextBold);
+                label.invalidate();
+            }
+        }
+    }
+
+    public boolean isTextBold() {
+        return isTextBold;
+    }
+
+    /**
      * 设置行间隔
      */
     public void setLineMargin(int margin) {
@@ -1070,24 +1095,18 @@ public class LabelsView extends ViewGroup implements View.OnClickListener, View.
         }
     }
 
-    public void setTextBold(boolean isBold) {
-        if (this.isTextBold != isBold) {
-            this.isTextBold = isBold;
-            requestLayout();
-        }
+    public boolean isSingleLine() {
+        return isSingleLine;
     }
 
     /**
      * 需要在该View的layout完成之后调用，一般是使用view.post(Runable task)来获取
      * 比如设置了新的labels之后需要获取新的lines就可以这样
+     *
      * @return
      */
     public int getLines() {
         return this.lines;
-    }
-
-    public boolean isSingleLine() {
-        return isSingleLine;
     }
 
     /**
