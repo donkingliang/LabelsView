@@ -45,6 +45,7 @@
         app:maxSelect="0"
         app:minSelect="1"
         app:selectType="MULTI"
-        app:wordMargin="10dp" />
+        app:wordMargin="10dp"
+        app:isTextBold="true" />
 
 </LinearLayout>

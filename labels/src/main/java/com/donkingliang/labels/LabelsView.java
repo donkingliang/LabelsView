@@ -39,6 +39,7 @@ public class LabelsView extends ViewGroup implements View.OnClickListener, View.
     private int mMinSelect;
     private int mMaxLines;
     private boolean isSingleLine = false;
+    private boolean isTextBold = false;
 
     private boolean isIndicator; //只能看，不能手动改变选中状态。
 
@@ -53,6 +54,9 @@ public class LabelsView extends ViewGroup implements View.OnClickListener, View.
 
     //保存必选项。在多选模式下，可以设置必选项，必选项默认选中，不能反选
     private ArrayList<Integer> mCompulsorys = new ArrayList<>();
+
+    //当前的label行数，需要在layout完成之后才知道的，调用的时候需要在对应方法之后在调用post()来获取
+    private int lines;
 
     private OnLabelClickListener mLabelClickListener;
     private OnLabelLongClickListener mLabelLongClickListener;
@@ -166,6 +170,7 @@ public class LabelsView extends ViewGroup implements View.OnClickListener, View.
             }
 
             isSingleLine = mTypedArray.getBoolean(R.styleable.LabelsView_singleLine, false);
+            isTextBold = mTypedArray.getBoolean(R.styleable.LabelsView_isTextBold, false);
 
             mTypedArray.recycle();
         }
@@ -220,6 +225,7 @@ public class LabelsView extends ViewGroup implements View.OnClickListener, View.
         }
         setMeasuredDimension(measureSize(widthMeasureSpec, contentWidth + getPaddingLeft() + getPaddingRight()),
                 measureSize(heightMeasureSpec, maxItemHeight + getPaddingTop() + getPaddingBottom()));
+        lines = 1;
     }
 
     /**
@@ -245,6 +251,7 @@ public class LabelsView extends ViewGroup implements View.OnClickListener, View.
             if (lineWidth + view.getMeasuredWidth() > maxWidth) {
                 lineCount++;
                 if (mMaxLines > 0 && lineCount > mMaxLines) {
+                    lineCount--;
                     break;
                 }
                 contentHeight += mLineMargin;
@@ -262,6 +269,7 @@ public class LabelsView extends ViewGroup implements View.OnClickListener, View.
                     // 换行
                     lineCount++;
                     if (mMaxLines > 0 && lineCount > mMaxLines) {
+                        lineCount--;
                         break;
                     }
                     contentHeight += mLineMargin;
@@ -274,7 +282,7 @@ public class LabelsView extends ViewGroup implements View.OnClickListener, View.
                 }
             }
         }
-
+        this.lines = lineCount;
         contentHeight += maxItemHeight;
         maxLineWidth = Math.max(maxLineWidth, lineWidth);
 
@@ -353,6 +361,7 @@ public class LabelsView extends ViewGroup implements View.OnClickListener, View.
     private static final String KEY_LABEL_HEIGHT_STATE = "key_label_height_state";
     private static final String KEY_LABEL_GRAVITY_STATE = "key_label_gravity_state";
     private static final String KEY_SINGLE_LINE_STATE = "key_single_line_state";
+    private static final String KEY_TEXT_STYLE_STATE = "key_text_style_state";
 
     @Override
     protected Parcelable onSaveInstanceState() {
@@ -406,6 +415,7 @@ public class LabelsView extends ViewGroup implements View.OnClickListener, View.
         }
 
         bundle.putBoolean(KEY_SINGLE_LINE_STATE, isSingleLine);
+        bundle.putBoolean(KEY_TEXT_STYLE_STATE, isTextBold);
 
         return bundle;
     }
@@ -455,6 +465,7 @@ public class LabelsView extends ViewGroup implements View.OnClickListener, View.
             setIndicator(bundle.getBoolean(KEY_INDICATOR_STATE, isIndicator));
 
             setSingleLine(bundle.getBoolean(KEY_SINGLE_LINE_STATE, isSingleLine));
+            setTextBold(bundle.getBoolean(KEY_TEXT_STYLE_STATE, isTextBold));
 
 //            //恢复标签列表
 //            ArrayList<String> labels = bundle.getStringArrayList(KEY_LABELS_STATE);
@@ -545,6 +556,7 @@ public class LabelsView extends ViewGroup implements View.OnClickListener, View.
         label.setTag(KEY_POSITION, position);
         label.setOnClickListener(this);
         label.setOnLongClickListener(this);
+        label.getPaint().setFakeBoldText(isTextBold);
         addView(label, mLabelWidth, mLabelHeight);
         label.setText(provider.getLabelText(label, position, data));
     }
@@ -1056,6 +1068,22 @@ public class LabelsView extends ViewGroup implements View.OnClickListener, View.
             this.isSingleLine = isSingleLine;
             requestLayout();
         }
+    }
+
+    public void setTextBold(boolean isBold) {
+        if (this.isTextBold != isBold) {
+            this.isTextBold = isBold;
+            requestLayout();
+        }
+    }
+
+    /**
+     * 需要在该View的layout完成之后调用，一般是使用view.post(Runable task)来获取
+     * 比如设置了新的labels之后需要获取新的lines就可以这样
+     * @return
+     */
+    public int getLines() {
+        return this.lines;
     }
 
     public boolean isSingleLine() {

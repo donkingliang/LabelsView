@@ -70,5 +70,6 @@
         <attr name="wordMargin" format="dimension" />
         <attr name="labelBackground" format="reference|color" />
         <attr name="singleLine" format="boolean" />
+        <attr name="isTextBold" format="boolean" />
     </declare-styleable>
 </resources>
