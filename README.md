@@ -15,7 +15,7 @@ allprojects {
 在Module的build.gradle在添加以下代码
 ```
 dependencies {
-    implementation 'com.github.donkingliang:LabelsView:1.6.2'
+    implementation 'com.github.donkingliang:LabelsView:1.6.3'
 }
 ```
 
@@ -48,6 +48,7 @@ app:labelTextHeight="wrap_content"  // 标签项高
 app:labelGravity="center"  // 标签项的文本显示方向
 app:labelTextPadding="5dp"  // 标签的Padding
 app:singleLine="true"  // 单行显示，默认false
+app:isTextBold="true" // 是否粗字体，默认false
 
 ```
 这里有两个地方需要说明一下：
@@ -240,7 +241,11 @@ public void setLabelGravity(int gravity)；
 // 设置是否单行显示
 public void setMaxLines(int maxLines)；
 
+// 设置标签字体是否为粗体
+public void setTextBold(boolean isBold);
 
+// 换行标签的行数
+public int getLines();
 ```
 所有的set方法都有对应的get方法，这里就不说了。
 
