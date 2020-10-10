@@ -244,7 +244,7 @@ public void setMaxLines(int maxLines)；
 // 设置标签字体是否为粗体
 public void setTextBold(boolean isBold);
 
-// 换行标签的行数
+// 获取标签的行数
 public int getLines();
 ```
 所有的set方法都有对应的get方法，这里就不说了。
