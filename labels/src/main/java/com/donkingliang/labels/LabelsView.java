@@ -783,7 +783,10 @@ public class LabelsView extends ViewGroup implements View.OnClickListener, View.
      * @return
      */
     public List<Integer> getSelectLabels() {
-        return mSelectLabels;
+        // 返回新的List对象，避免外部获取mSelectLabels后直接操作数据
+        List<Integer> list = new ArrayList<>();
+        list.addAll(mSelectLabels);
+        return list;
     }
 
     /**
@@ -1229,6 +1232,17 @@ public class LabelsView extends ViewGroup implements View.OnClickListener, View.
          * @return
          */
         CharSequence getLabelText(TextView label, int position, T data);
+    }
+
+    /**
+     *
+     */
+    public interface Selectable {
+
+        void onSelected(boolean selected);
+
+        boolean isSelected();
+
     }
 
 }
