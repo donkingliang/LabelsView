@@ -1,16 +1,14 @@
 package com.donkingliang.labelsviewdemo;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
-import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.donkingliang.labels.LabelsView;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import static com.donkingliang.labelsviewdemo.R.id.labels;
 
@@ -38,6 +36,7 @@ public class MainActivity extends AppCompatActivity implements LabelsView.OnLabe
         btns.add("指示器模式");
         btns.add("取消选中");
         btns.add("点击");
+        btns.add("在列表中使用");
         btnLabels.setLabels(btns);
         btnLabels.setOnLabelClickListener(this);
 
@@ -86,8 +85,10 @@ public class MainActivity extends AppCompatActivity implements LabelsView.OnLabe
 
     @Override
     public void onLabelClick(TextView label, Object data, int position) {
-        labelsView.setOnLabelClickListener(null);
-        labelsView.clearCompulsorys();
+        if (position != 10) {
+            labelsView.setOnLabelClickListener(null);
+            labelsView.clearCompulsorys();
+        }
         switch (position) {
             case 0:
                 labelsView.setSelectType(LabelsView.SelectType.NONE);
@@ -150,6 +151,9 @@ public class MainActivity extends AppCompatActivity implements LabelsView.OnLabe
                                 Toast.LENGTH_LONG).show();
                     }
                 });
+                break;
+            case 10:
+               startActivity(new Intent(this,RecyclerViewActivity.class));
                 break;
         }
     }
