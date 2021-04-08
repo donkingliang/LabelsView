@@ -15,7 +15,7 @@ allprojects {
 在Module的build.gradle在添加以下代码
 ```
 dependencies {
-    implementation 'com.github.donkingliang:LabelsView:1.6.3'
+    implementation 'com.github.donkingliang:LabelsView:1.6.4'
 }
 ```
 
