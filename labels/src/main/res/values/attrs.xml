@@ -48,6 +48,7 @@
         <attr name="maxSelect" format="integer" />
         <attr name="minSelect" format="integer" />
         <attr name="maxLines" format="integer" />
+        <attr name="maxColumns" format="integer" />
         <attr name="isIndicator" format="boolean" />
         <attr name="labelTextColor" format="reference|color" />
         <attr name="labelTextSize" format="dimension" />

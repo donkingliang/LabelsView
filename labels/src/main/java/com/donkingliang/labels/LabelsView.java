@@ -38,6 +38,7 @@ public class LabelsView extends ViewGroup implements View.OnClickListener, View.
     private int mMaxSelect;
     private int mMinSelect;
     private int mMaxLines;
+    private int mMaxColumns;
     private boolean isSingleLine = false;
     private boolean isTextBold = false;
 
@@ -56,7 +57,7 @@ public class LabelsView extends ViewGroup implements View.OnClickListener, View.
     private ArrayList<Integer> mCompulsorys = new ArrayList<>();
 
     //当前的label行数，需要在layout完成之后才知道的，调用的时候需要在对应方法之后在调用post()来获取
-    private int lines;
+    private int mLines;
 
     private OnLabelClickListener mLabelClickListener;
     private OnLabelLongClickListener mLabelLongClickListener;
@@ -126,6 +127,7 @@ public class LabelsView extends ViewGroup implements View.OnClickListener, View.
             mMaxSelect = mTypedArray.getInteger(R.styleable.LabelsView_maxSelect, 0);
             mMinSelect = mTypedArray.getInteger(R.styleable.LabelsView_minSelect, 0);
             mMaxLines = mTypedArray.getInteger(R.styleable.LabelsView_maxLines, 0);
+            mMaxColumns = mTypedArray.getInteger(R.styleable.LabelsView_maxColumns, 0);
             isIndicator = mTypedArray.getBoolean(R.styleable.LabelsView_isIndicator, false);
 
             mLabelGravity = mTypedArray.getInt(R.styleable.LabelsView_labelGravity, mLabelGravity);
@@ -213,8 +215,11 @@ public class LabelsView extends ViewGroup implements View.OnClickListener, View.
         int count = getChildCount();
         int contentWidth = 0; //记录内容的宽度
         int maxItemHeight = 0; //记录一行中item高度最大的高度
-
         for (int i = 0; i < count; i++) {
+            if ((mMaxColumns > 0 && i == mMaxColumns)) {
+                break;
+            }
+
             View view = getChildAt(i);
             measureChild(view, widthMeasureSpec, heightMeasureSpec);
             contentWidth += view.getMeasuredWidth();
@@ -227,7 +232,7 @@ public class LabelsView extends ViewGroup implements View.OnClickListener, View.
                 measureSize(heightMeasureSpec, maxItemHeight + getPaddingTop() + getPaddingBottom()));
 
         // 如果count等于0，没有标签，则lines为0
-        lines = count > 0 ? 1 : 0;
+        mLines = count > 0 ? 1 : 0;
     }
 
     /**
@@ -245,12 +250,14 @@ public class LabelsView extends ViewGroup implements View.OnClickListener, View.
         int maxLineWidth = 0; //记录最宽的行宽
         int maxItemHeight = 0; //记录一行中item高度最大的高度
         int lineCount = 1;
+        int columnsCount = 0;
 
         for (int i = 0; i < count; i++) {
             View view = getChildAt(i);
             measureChild(view, widthMeasureSpec, heightMeasureSpec);
 
-            if (lineWidth + view.getMeasuredWidth() > maxWidth) {
+            if ((lineWidth + view.getMeasuredWidth() > maxWidth)
+                    || (mMaxColumns > 0 && columnsCount == mMaxColumns)) {
                 lineCount++;
                 if (mMaxLines > 0 && lineCount > mMaxLines) {
                     lineCount--;
@@ -261,9 +268,11 @@ public class LabelsView extends ViewGroup implements View.OnClickListener, View.
                 maxItemHeight = 0;
                 maxLineWidth = Math.max(maxLineWidth, lineWidth);
                 lineWidth = 0;
+                columnsCount = 0;
             }
 
             lineWidth += view.getMeasuredWidth();
+            columnsCount++;
             maxItemHeight = Math.max(maxItemHeight, view.getMeasuredHeight());
 
             if (i != count - 1) {
@@ -279,6 +288,7 @@ public class LabelsView extends ViewGroup implements View.OnClickListener, View.
                     maxItemHeight = 0;
                     maxLineWidth = Math.max(maxLineWidth, lineWidth);
                     lineWidth = 0;
+                    columnsCount = 0;
                 } else {
                     lineWidth += mWordMargin;
                 }
@@ -291,7 +301,7 @@ public class LabelsView extends ViewGroup implements View.OnClickListener, View.
                 measureSize(heightMeasureSpec, contentHeight + getPaddingTop() + getPaddingBottom()));
 
         // 如果count等于0，没有标签，则lines为0
-        lines = count > 0 ? lineCount : 0;
+        mLines = count > 0 ? lineCount : 0;
     }
 
     private int measureSize(int measureSpec, int size) {
@@ -320,12 +330,14 @@ public class LabelsView extends ViewGroup implements View.OnClickListener, View.
         int contentWidth = right - left;
         int maxItemHeight = 0;
         int lineCount = 1;
+        int columnsCount = 0;
 
         int count = getChildCount();
         for (int i = 0; i < count; i++) {
             View view = getChildAt(i);
 
-            if (!isSingleLine && contentWidth < x + view.getMeasuredWidth() + getPaddingRight()) {
+            if (!isSingleLine && (contentWidth < x + view.getMeasuredWidth() + getPaddingRight()
+                    || (mMaxColumns > 0 && columnsCount == mMaxColumns))) {
                 lineCount++;
                 if (mMaxLines > 0 && lineCount > mMaxLines) {
                     break;
@@ -334,11 +346,18 @@ public class LabelsView extends ViewGroup implements View.OnClickListener, View.
                 y += mLineMargin;
                 y += maxItemHeight;
                 maxItemHeight = 0;
+                columnsCount = 0;
             }
+
+            if (isSingleLine && (mMaxColumns > 0 && columnsCount == mMaxColumns)){
+                break;
+            }
+
             view.layout(x, y, x + view.getMeasuredWidth(), y + view.getMeasuredHeight());
             x += view.getMeasuredWidth();
             x += mWordMargin;
             maxItemHeight = Math.max(maxItemHeight, view.getMeasuredHeight());
+            columnsCount++;
         }
     }
 
@@ -354,6 +373,7 @@ public class LabelsView extends ViewGroup implements View.OnClickListener, View.
     private static final String KEY_MAX_SELECT_STATE = "key_max_select_state";
     private static final String KEY_MIN_SELECT_STATE = "key_min_select_state";
     private static final String KEY_MAX_LINES_STATE = "key_max_lines_state";
+    private static final String KEY_MAX_COLUMNS_STATE = "key_max_columns_state";
     private static final String KEY_INDICATOR_STATE = "key_indicator_state";
     // 由于新版(1.4.0)的标签列表允许设置任何类型的数据，而不仅仅是String。并且标签显示的内容
     // 最终由LabelTextProvider提供，所以LabelsView不再在onSaveInstanceState()和onRestoreInstanceState()
@@ -401,6 +421,8 @@ public class LabelsView extends ViewGroup implements View.OnClickListener, View.
         bundle.putInt(KEY_MIN_SELECT_STATE, mMinSelect);
         //保存标签的最大行数
         bundle.putInt(KEY_MAX_LINES_STATE, mMaxLines);
+        //保存标签的最大列数
+        bundle.putInt(KEY_MAX_COLUMNS_STATE, mMaxColumns);
         //保存是否是指示器模式
         bundle.putBoolean(KEY_INDICATOR_STATE, isIndicator);
 
@@ -465,6 +487,8 @@ public class LabelsView extends ViewGroup implements View.OnClickListener, View.
             setMinSelect(bundle.getInt(KEY_MIN_SELECT_STATE, mMinSelect));
             //恢复标签的最大行数
             setMaxLines(bundle.getInt(KEY_MAX_LINES_STATE, mMaxLines));
+            //恢复标签的最大列数
+            setMaxLines(bundle.getInt(KEY_MAX_COLUMNS_STATE, mMaxColumns));
             //恢复是否是指示器模式
             setIndicator(bundle.getBoolean(KEY_INDICATOR_STATE, isIndicator));
 
@@ -1073,6 +1097,22 @@ public class LabelsView extends ViewGroup implements View.OnClickListener, View.
     }
 
     /**
+     * 设置最大列数，小于等于0则不限行数。
+     *
+     * @param maxColumns
+     */
+    public void setMaxColumns(int maxColumns) {
+        if (mMaxColumns != maxColumns) {
+            mMaxColumns = maxColumns;
+            requestLayout();
+        }
+    }
+
+    public int getMaxColumns() {
+        return mMaxColumns;
+    }
+
+    /**
      * 设置为指示器模式，只能看，不能手动操作。这种模式下，用户不能通过手动点击改变标签的选中状态。
      * 但是仍然可以通过调用setSelects()、clearAllSelect()等方法改变标签的选中状态。
      *
@@ -1109,7 +1149,7 @@ public class LabelsView extends ViewGroup implements View.OnClickListener, View.
      * @return
      */
     public int getLines() {
-        return this.lines;
+        return this.mLines;
     }
 
     /**
