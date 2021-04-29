@@ -15,7 +15,7 @@ allprojects {
 在Module的build.gradle在添加以下代码
 ```
 dependencies {
-    implementation 'com.github.donkingliang:LabelsView:1.6.4'
+    implementation 'com.github.donkingliang:LabelsView:1.6.5'
 }
 ```
 
@@ -38,6 +38,7 @@ dependencies {
        app:wordMargin="10dp"   //标签与标签的距离
        app:selectType="SINGLE"   //标签的选择类型 有单选(可反选)、单选(不可反选)、多选、不可选四种类型
        app:maxLines="3"    // 设置最大显示行数，小于等于0则不限行数。
+       app:maxColumns="5"  // 设置最大显示列数，小于等于0则不限行数。
        app:maxSelect="5"   //标签的最大选择数量，只有多选的时候才有用，0为不限数量
        app:minSelect="1"   //标签的最少选择数量，只有多选的时候才有用，0为不限数量
        app:isIndicator="true" />   //设置为指示器模式，不能手动改变标签的选中状态
@@ -234,6 +235,9 @@ public void setWordMargin(int margin);
 
 // 设置最大显示行数，小于等于0则不限行数。
 public void setMaxLines(int maxLines);
+
+// 设置最大显示列数，小于等于0则不限行数。
+public void setMaxColumns(int maxColumns)
 
 // 设置标签文本显示方向
 public void setLabelGravity(int gravity)；
