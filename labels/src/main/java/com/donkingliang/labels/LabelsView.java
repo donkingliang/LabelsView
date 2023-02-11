@@ -595,8 +595,9 @@ public class LabelsView extends ViewGroup implements View.OnClickListener, View.
     private void ensureLabelClickable() {
         int count = getChildCount();
         for (int i = 0; i < count; i++) {
-            TextView label = (TextView) getChildAt(i);
-            label.setClickable(mLabelClickListener != null || mLabelLongClickListener != null || mSelectType != SelectType.NONE);
+            View label = getChildAt(i);
+            label.setClickable(mLabelClickListener != null || mSelectType != SelectType.NONE);
+            label.setLongClickable(mLabelLongClickListener != null);
         }
     }
 
