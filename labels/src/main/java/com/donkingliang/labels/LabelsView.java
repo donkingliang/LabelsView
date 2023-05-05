@@ -488,7 +488,7 @@ public class LabelsView extends ViewGroup implements View.OnClickListener, View.
             //恢复标签的最大行数
             setMaxLines(bundle.getInt(KEY_MAX_LINES_STATE, mMaxLines));
             //恢复标签的最大列数
-            setMaxLines(bundle.getInt(KEY_MAX_COLUMNS_STATE, mMaxColumns));
+            setMaxColumns(bundle.getInt(KEY_MAX_COLUMNS_STATE, mMaxColumns));
             //恢复是否是指示器模式
             setIndicator(bundle.getBoolean(KEY_INDICATOR_STATE, isIndicator));
 
