@@ -3,7 +3,6 @@ package com.donkingliang.labels;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
-import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -25,6 +24,7 @@ public class LabelsView extends ViewGroup implements View.OnClickListener, View.
     private ColorStateList mTextColor;
     private float mTextSize;
     private Drawable mLabelBg;
+    private int labelBgId;
     private int mLabelWidth = -2;
     private int mLabelHeight = -2;
     private int mLabelGravity = Gravity.CENTER;
@@ -161,12 +161,14 @@ public class LabelsView extends ViewGroup implements View.OnClickListener, View.
             mWordMargin = mTypedArray.getDimensionPixelOffset(R.styleable.LabelsView_wordMargin, dp2px(5));
             if (mTypedArray.hasValue(R.styleable.LabelsView_labelBackground)) {
                 int labelBgResId = mTypedArray.getResourceId(R.styleable.LabelsView_labelBackground, 0);
-                if (labelBgResId != 0) {
-                    mLabelBg = getResources().getDrawable(labelBgResId);
-                } else {
-                    int labelBgColor = mTypedArray.getColor(R.styleable.LabelsView_labelBackground, Color.TRANSPARENT);
-                    mLabelBg = new ColorDrawable(labelBgColor);
-                }
+                labelBgId = labelBgResId;
+//                if (labelBgResId != 0) {
+//
+//                    mLabelBg = getResources().getDrawable(labelBgResId);
+//                } else {
+//                    int labelBgColor = mTypedArray.getColor(R.styleable.LabelsView_labelBackground, Color.TRANSPARENT);
+//                    mLabelBg = new ColorDrawable(labelBgColor);
+//                }
             } else {
                 mLabelBg = getResources().getDrawable(R.drawable.default_label_bg);
             }
@@ -578,7 +580,11 @@ public class LabelsView extends ViewGroup implements View.OnClickListener, View.
         label.setTextColor(mTextColor);
         //设置给label的背景(Drawable)是一个Drawable对象的拷贝，
         // 因为如果所有的标签都共用一个Drawable对象，会引起背景错乱。
-        label.setBackgroundDrawable(mLabelBg.getConstantState().newDrawable());
+        if (labelBgId > 0) {
+            label.setBackgroundResource(labelBgId);
+        } else {
+            label.setBackgroundDrawable(mLabelBg.getConstantState().newDrawable());
+        }
         //label通过tag保存自己的数据(data)和位置(position)
         label.setTag(KEY_DATA, data);
         label.setTag(KEY_POSITION, position);
@@ -839,7 +845,9 @@ public class LabelsView extends ViewGroup implements View.OnClickListener, View.
      * @param resId
      */
     public void setLabelBackgroundResource(int resId) {
-        setLabelBackgroundDrawable(getResources().getDrawable(resId));
+        labelBgId = resId;
+        mLabelBg = null;
+        setLabelBackgroundDrawable();
     }
 
     /**
@@ -848,20 +856,23 @@ public class LabelsView extends ViewGroup implements View.OnClickListener, View.
      * @param color
      */
     public void setLabelBackgroundColor(int color) {
-        setLabelBackgroundDrawable(new ColorDrawable(color));
+        mLabelBg = new ColorDrawable(color);
+        labelBgId = 0;
+        setLabelBackgroundDrawable();
     }
 
     /**
      * 设置标签背景
-     *
-     * @param drawable
      */
-    public void setLabelBackgroundDrawable(Drawable drawable) {
-        mLabelBg = drawable;
+    private void setLabelBackgroundDrawable() {
         int count = getChildCount();
         for (int i = 0; i < count; i++) {
             TextView label = (TextView) getChildAt(i);
-            label.setBackgroundDrawable(mLabelBg.getConstantState().newDrawable());
+            if (labelBgId > 0) {
+                label.setBackgroundResource(labelBgId);
+            } else {
+                label.setBackgroundDrawable(mLabelBg.getConstantState().newDrawable());
+            }
         }
     }
 
